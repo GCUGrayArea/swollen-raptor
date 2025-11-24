@@ -236,6 +236,8 @@ interface DraggableChipProps extends ChipProps {
 ### Architecture
 
 #### Package Structure
+
+**Core DnD Infrastructure** (new directories in `packages/mui-material/src/`):
 ```
 packages/mui-material/src/
 ├── DndContext/
@@ -243,6 +245,10 @@ packages/mui-material/src/
 │   ├── DndContext.d.ts
 │   ├── DndContext.test.tsx
 │   ├── dndContextClasses.ts
+│   └── index.ts
+├── SortableContext/
+│   ├── SortableContext.tsx
+│   ├── SortableContext.d.ts
 │   └── index.ts
 ├── useDraggable/
 │   ├── useDraggable.ts
@@ -256,10 +262,6 @@ packages/mui-material/src/
 │   ├── useSortable.ts
 │   ├── useSortable.d.ts
 │   └── useSortable.test.ts
-├── SortableContext/
-│   ├── SortableContext.tsx
-│   ├── SortableContext.d.ts
-│   └── index.ts
 └── internal/
     ├── collision/
     │   ├── closestCenter.ts
@@ -271,12 +273,52 @@ packages/mui-material/src/
         └── announcements.ts
 ```
 
+**Draggable Components** (added to existing component directories):
+```
+packages/mui-material/src/
+├── ListItem/
+│   ├── ... (existing files)
+│   ├── DraggableListItem.tsx        # NEW
+│   ├── DraggableListItem.d.ts       # NEW
+│   └── DraggableListItem.test.tsx   # NEW
+├── TableRow/
+│   ├── ... (existing files)
+│   ├── DraggableTableRow.tsx        # NEW
+│   ├── DraggableTableRow.d.ts       # NEW
+│   └── DraggableTableRow.test.tsx   # NEW
+├── Grid/
+│   ├── ... (existing files)
+│   ├── DraggableGridItem.tsx        # NEW
+│   ├── DraggableGridItem.d.ts       # NEW
+│   └── DraggableGridItem.test.tsx   # NEW
+└── Chip/
+    ├── ... (existing files)
+    ├── DraggableChip.tsx            # NEW
+    ├── DraggableChip.d.ts           # NEW
+    └── DraggableChip.test.tsx       # NEW
+```
+
 #### Component Integration Points
-Draggable variants extend existing components without modifying base implementations:
-- `DraggableListItem` wraps `ListItem`
-- `DraggableTableRow` wraps `TableRow`
-- `DraggableGrid` container with `DraggableGridItem`
-- `DraggableChip` wraps `Chip`
+Draggable variants are co-located with their base components so users can import from expected locations:
+- `DraggableListItem` in `ListItem/` - wraps `ListItem`
+- `DraggableTableRow` in `TableRow/` - wraps `TableRow`
+- `DraggableGridItem` in `Grid/` - wraps Grid item
+- `DraggableChip` in `Chip/` - wraps `Chip`
+
+**Import patterns** (users import from main package as expected):
+```typescript
+import {
+  DraggableListItem,
+  DraggableTableRow,
+  DraggableGridItem,
+  DraggableChip,
+  DndContext,
+  SortableContext,
+  useDraggable,
+  useDroppable,
+  useSortable
+} from '@mui/material';
+```
 
 ### Coding Standards
 - Follow MUI's existing patterns for hooks and components
