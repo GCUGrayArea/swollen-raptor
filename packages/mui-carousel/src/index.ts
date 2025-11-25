@@ -12,6 +12,10 @@
 export { default as Carousel } from './Carousel';
 export * from './Carousel';
 
+// Sub-components
+export * from './CarouselNavigation';
+export * from './CarouselIndicators';
+
 // Context for sub-component communication
 export * from './CarouselContext';
 

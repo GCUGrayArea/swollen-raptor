@@ -20,6 +20,8 @@ import {
   calculateSlideWidth,
   calculateTransformOffset,
 } from '../utils/carouselHelpers';
+import CarouselNavigation from '../CarouselNavigation';
+import CarouselIndicators from '../CarouselIndicators';
 
 const useUtilityClasses = (ownerState: CarouselOwnerState) => {
   const { classes, isAutoPlaying } = ownerState;
@@ -249,7 +251,15 @@ const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(function Carous
             );
           })}
         </SlidesSlot>
-        {/* Navigation and indicators will be added in PR-004 */}
+        {!hideNavigation && (
+          <CarouselNavigation
+            prevIcon={prevIcon}
+            nextIcon={nextIcon}
+            prevButtonProps={prevButtonProps}
+            nextButtonProps={nextButtonProps}
+          />
+        )}
+        {!hideIndicators && <CarouselIndicators />}
       </RootSlot>
     </CarouselProvider>
   );
