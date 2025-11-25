@@ -621,7 +621,7 @@ Implement the SortableContext provider that tracks item order for sortable lists
 - [ ] Provides context values to useSortable hooks
 - [ ] TypeScript types properly exported
 - [ ] useSortable consumes SortableContext when available (optional)
-- [ ] Grid strategy requires explicit `columns` prop
+- [ ] Grid strategy requires `columns` prop (enforced via TypeScript discriminated union)
 
 **Notes:**
 Keep nested inside DndContext. Study how MUI handles nested contexts.
@@ -635,15 +635,18 @@ SortableContext provides sorting intelligence that useSortable currently lacks. 
 ```typescript
 type SortingStrategy = 'vertical' | 'horizontal' | 'grid';
 
-interface SortableContextProps {
+// Base props shared by all strategies
+interface SortableContextBaseProps {
   children: React.ReactNode;
   /** Ordered array of item identifiers */
   items: UniqueIdentifier[];
-  /** Sorting strategy for calculating item positions. @default 'vertical' */
-  strategy?: SortingStrategy;
-  /** Number of columns (required for 'grid' strategy) */
-  columns?: number;
 }
+
+// Discriminated union: columns required only for grid strategy
+type SortableContextProps = SortableContextBaseProps & (
+  | { strategy?: 'vertical' | 'horizontal'; columns?: never }
+  | { strategy: 'grid'; columns: number }
+);
 
 // Context value provided to useSortable hooks
 interface SortableContextValue {
@@ -759,7 +762,7 @@ export * from './strategies';
 
 **Design Decisions:**
 1. SortableContext is **optional** for useSortable - maintains backward compatibility
-2. Grid strategy requires explicit `columns` prop - auto-detection adds complexity for marginal benefit
+2. Grid strategy **requires** `columns` prop via TypeScript discriminated union - compile-time enforcement, no runtime surprises
 3. Types are inline in .tsx (MUI convention for new components), no separate .d.ts file
 4. Strategies are in separate file for tree-shaking and clarity
 
