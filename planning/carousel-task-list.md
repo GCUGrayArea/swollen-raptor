@@ -1545,7 +1545,7 @@ estimated_files:
       - Add id attribute to each slide (pattern: `${carouselId}-slide-${index}`)
       - Add visually hidden instructions element for screen readers
       - Add aria-describedby linking to instructions element
-      - Update aria-hidden logic to handle slidesPerView > 1 (visible slides not hidden)
+      - Add comment clarifying aria-hidden behavior (only active slide visible, intentional)
       - Add carouselId and slidesContainerId to context value
   - path: packages/mui-carousel/src/CarouselNavigation/CarouselNavigation.tsx
     action: modify
@@ -1562,8 +1562,9 @@ estimated_files:
       - Add aria-controls pointing to corresponding slide ID
       - Implement roving tabindex: active indicator has tabIndex=0, others -1
       - Add keyboard navigation within indicator group (left/right arrows)
+      - Wrap behavior based on enableLoop: wrap when true, stop at ends when false
       - Add onKeyDown handler for arrow key navigation between indicators
-      - Use useEventCallback for stable handler reference
+      - Use refs array to programmatically focus indicators
   - path: packages/mui-carousel/src/types/index.ts
     action: modify
     description: |
@@ -1652,15 +1653,26 @@ planning_notes: |
 
   **Roving Tabindex (in CarouselIndicators.tsx):**
   ```typescript
+  // Get enableLoop from context to determine wrap behavior
+  const { enableLoop } = useCarouselContext();
+
   const handleIndicatorKeyDown = (event: React.KeyboardEvent, index: number) => {
     if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
       event.preventDefault();
-      const nextIndex = (index + 1) % slideCount;
-      // Focus next indicator (need refs array)
+      if (enableLoop) {
+        const nextIndex = (index + 1) % slideCount;
+        // Focus next indicator (wrap around)
+      } else if (index < slideCount - 1) {
+        // Focus next indicator (stop at end)
+      }
     } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
       event.preventDefault();
-      const prevIndex = (index - 1 + slideCount) % slideCount;
-      // Focus prev indicator
+      if (enableLoop) {
+        const prevIndex = (index - 1 + slideCount) % slideCount;
+        // Focus prev indicator (wrap around)
+      } else if (index > 0) {
+        // Focus prev indicator (stop at start)
+      }
     }
   };
 
@@ -1671,14 +1683,15 @@ planning_notes: |
   />
   ```
 
-  **Multi-slide aria-hidden (in Carousel.tsx):**
+  **aria-hidden on Slides (in Carousel.tsx):**
   ```typescript
-  const isSlideVisible = (index: number) => {
-    return index >= activeIndex && index < activeIndex + effectiveSlidesPerView;
-  };
+  // NOTE: Only the active slide has aria-hidden="false", even when slidesPerView > 1.
+  // This is intentional - screen readers should focus on the semantically "active" slide,
+  // not all visible slides. Users can still Tab into content on adjacent visible slides.
+  const isActive = index === activeIndex;
 
   // In renderSlides():
-  aria-hidden={!isSlideVisible(index)}
+  aria-hidden={!isActive}
   ```
 
   ### Files NOT Modified
@@ -1695,9 +1708,11 @@ planning_notes: |
 
   ### Questions Resolved During Planning
   - Q: Should indicators navigate on focus change? A: No, focus moves independently of slide. User must click/press Enter to navigate.
+  - Q: Should indicator keyboard navigation wrap? A: Key this based on enableLoop setting. If loop enabled, wrap; if not, stop at ends.
   - Q: Use aria-current or aria-selected for active indicator? A: aria-selected (already using, correct for tab pattern)
   - Q: Dedicated live region vs current approach? A: Current aria-live on slides is sufficient for v1
   - Q: Include instructions for all languages? A: English only for v1; i18n is future work
+  - Q: Multi-slide aria-hidden behavior? A: Only the active slide has aria-hidden="false", even when slidesPerView > 1. Add comment explaining this is intentional.
 ---
 
 **Description:**
@@ -1707,12 +1722,12 @@ Enhance accessibility with comprehensive ARIA attributes and screen reader suppo
 - [x] role="region" with proper labels (already complete)
 - [x] aria-live regions for announcements (already complete)
 - [x] Navigation controls have descriptive aria-labels (already complete)
+- [x] aria-hidden on slides (already complete - only active slide visible to screen readers)
 - [ ] aria-controls relationships between controls and slides
 - [ ] Roving tabindex on indicators (only active in tab order)
-- [ ] Keyboard navigation within indicator group (arrow keys)
+- [ ] Keyboard navigation within indicator group (arrow keys, respects enableLoop)
 - [ ] Visually hidden instructions for screen readers
 - [ ] aria-describedby linking carousel to instructions
-- [ ] Multi-slide aria-hidden handling for slidesPerView > 1
 - [ ] Unique IDs on carousel, slides container, and each slide
 - [ ] Passes accessibility audit tools (aXe, Lighthouse)
 
