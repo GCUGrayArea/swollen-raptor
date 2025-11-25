@@ -196,8 +196,8 @@ estimated_files:
     action: create
     description: |
       Shared types used across carousel package components:
-      - CarouselTransition = 'slide' | 'fade' (zoom deferred to v2)
-      - CarouselOrientation = 'horizontal' (vertical deferred to v2)
+      - CarouselTransition = 'slide' | 'fade'
+      - CarouselOrientation = 'horizontal' (v1 only, no union type)
       - SlideChangeReason = 'auto' | 'navigation' | 'swipe' | 'keyboard' | 'indicator'
       - CarouselDirection = 'forward' | 'backward'
       - CarouselContextValue interface for context provider
@@ -224,8 +224,8 @@ planning_notes: |
 
   ### Key Design Decisions
   1. **Controlled/Uncontrolled Pattern**: Use activeIndex + defaultActiveIndex (like Slider's value/defaultValue)
-  2. **Transition Types**: Start with 'slide' | 'fade' only; 'zoom' deferred to v2 per PRD
-  3. **Orientation**: Type supports future vertical, but v1 implementation is horizontal only
+  2. **Transition Types**: 'slide' | 'fade' only; zoom excluded from v1
+  3. **Orientation**: 'horizontal' only in v1 (not a union type)
   4. **Override Interfaces**: Empty interfaces for color/size/variant allow theme extension
   5. **SlotProps Pattern**: Follow modern MUI slots/slotProps over deprecated components/componentsProps
 
