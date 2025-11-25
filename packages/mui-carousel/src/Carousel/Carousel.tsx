@@ -100,20 +100,18 @@ export const CarouselSlide = styled('div', {
   overflow: 'hidden',
 }));
 
-// Container for fade transitions - positions slides absolutely for crossfade
+// Container for fade transitions - uses grid to stack slides
 const FadeSlidesContainer = styled('div')({
   position: 'relative',
   width: '100%',
-  height: '100%',
+  display: 'grid',
+  gridTemplateAreas: '"slide"',
 });
 
-// Wrapper for individual fade slides - positioned absolutely to overlap
+// Wrapper for individual fade slides - stacked using grid area
 const FadeSlideWrapper = styled('div')({
-  position: 'absolute',
-  top: 0,
-  left: 0,
+  gridArea: 'slide',
   width: '100%',
-  height: '100%',
 });
 
 /**

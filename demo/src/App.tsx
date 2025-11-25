@@ -165,8 +165,8 @@ function App() {
                     fontStyle: 'italic',
                     mb: 3,
                     color: 'text.primary',
-                    '&::before': { content: '"""', color: 'primary.main', fontSize: '2rem' },
-                    '&::after': { content: '"""', color: 'primary.main', fontSize: '2rem' },
+                    '&::before': { content: '"\u201C"', color: 'primary.main', fontSize: '2rem', mr: 0.5 },
+                    '&::after': { content: '"\u201D"', color: 'primary.main', fontSize: '2rem', ml: 0.5 },
                   }}
                 >
                   {testimonial.quote}

@@ -27,13 +27,11 @@ const IndicatorsRoot = styled('div', {
   slot: 'Root',
   overridesResolver: (props, styles) => styles.root,
 })<{ ownerState: CarouselIndicatorsOwnerState }>(({ theme }) => ({
-  position: 'absolute',
-  bottom: theme.spacing(2),
-  left: '50%',
-  transform: 'translateX(-50%)',
   display: 'flex',
+  justifyContent: 'center',
   gap: theme.spacing(1),
-  zIndex: 1,
+  paddingTop: theme.spacing(2),
+  paddingBottom: theme.spacing(1),
 }));
 
 const Indicator = styled('button', {
