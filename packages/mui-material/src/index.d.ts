@@ -124,6 +124,9 @@ export * from './DialogContentText';
 export { default as DialogTitle } from './DialogTitle';
 export * from './DialogTitle';
 
+export { default as DndContext } from './DndContext';
+export * from './DndContext';
+
 export { default as Divider } from './Divider';
 export * from './Divider';
 
@@ -405,6 +408,12 @@ export * from './Zoom';
 
 export { default as useAutocomplete } from './useAutocomplete';
 export * from './useAutocomplete';
+
+export { default as useDraggable } from './useDraggable';
+export * from './useDraggable';
+
+export { default as useDroppable } from './useDroppable';
+export * from './useDroppable';
 
 export { default as GlobalStyles } from './GlobalStyles';
 export * from './GlobalStyles';
