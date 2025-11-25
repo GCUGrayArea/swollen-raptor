@@ -25,6 +25,9 @@ export * from './hooks';
 // Shared types
 export * from './types';
 
+// Transitions
+export * from './transitions';
+
 // Utilities (for advanced usage)
 export {
   clampIndex,
