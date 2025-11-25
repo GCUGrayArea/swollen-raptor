@@ -8,6 +8,7 @@ import { styled, useThemeProps } from '@mui/system';
 import { CarouselProps, CarouselOwnerState } from './Carousel.types';
 import { getCarouselUtilityClass } from './carouselClasses';
 import { useCarousel } from '../hooks/useCarousel';
+import { useSwipe } from '../hooks/useSwipe';
 import { CarouselProvider } from '../CarouselContext';
 import { CarouselContextValue } from '../types';
 import {
@@ -70,6 +71,10 @@ export const CarouselSlides = styled('div', {
     ownerState.spacing,
   ),
   gap: normalizeSpacing(ownerState.spacing),
+  // Gesture support
+  touchAction: 'pan-y', // Allow vertical scroll, capture horizontal
+  cursor: ownerState.dragging ? 'grabbing' : 'grab',
+  userSelect: ownerState.dragging ? 'none' : 'auto',
 }));
 
 export const CarouselSlide = styled('div', {
@@ -138,6 +143,7 @@ const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(function Carous
     slideCount,
     direction,
     dragging,
+    setDragging,
     isAutoPlaying,
     goToSlide,
     goToNext,
@@ -152,6 +158,7 @@ const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(function Carous
     autoPlay,
     autoPlayInterval,
     children,
+    disableGestures,
     enableLoop,
     onChange,
     slidesPerView,
@@ -159,6 +166,18 @@ const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(function Carous
     transition,
     transitionDuration,
   });
+
+  // Use swipe/drag gesture detection
+  const { handlers: swipeHandlers, swiping } = useSwipe({
+    onSwipeLeft: () => goToNext('swipe'),
+    onSwipeRight: () => goToPrevious('swipe'),
+    disabled: disableGestures,
+  });
+
+  // Sync swiping state with dragging
+  React.useEffect(() => {
+    setDragging(swiping);
+  }, [swiping, setDragging]);
 
   // Compose owner state with all props
   const ownerState: CarouselOwnerState = {
@@ -217,6 +236,7 @@ const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(function Carous
     externalSlotProps: slotProps.slides,
     additionalProps: {
       'aria-live': isAutoPlaying ? 'off' : 'polite',
+      ...swipeHandlers,
     },
     ownerState,
     className: classes.slides,

@@ -23,6 +23,7 @@ export interface UseCarouselParameters
     | 'autoPlay'
     | 'autoPlayInterval'
     | 'children'
+    | 'disableGestures'
     | 'enableLoop'
     | 'onChange'
     | 'slidesPerView'
@@ -40,6 +41,8 @@ export interface UseCarouselReturnValue {
   direction: CarouselDirection;
   /** Whether the carousel is currently being dragged/swiped */
   dragging: boolean;
+  /** Set dragging state */
+  setDragging: React.Dispatch<React.SetStateAction<boolean>>;
   /** Whether auto-play is currently active */
   isAutoPlaying: boolean;
   /** Navigate to a specific slide */
@@ -103,8 +106,8 @@ export function useCarousel(parameters: UseCarouselParameters): UseCarouselRetur
   // Auto-play state (will be expanded in PR-007)
   const [isAutoPlaying, setIsAutoPlaying] = React.useState(autoPlay);
 
-  // Dragging state (will be expanded in PR-005)
-  const dragging = false;
+  // Dragging state (for swipe/drag gestures)
+  const [dragging, setDragging] = React.useState(false);
 
   // Calculate navigation boundaries
   const maxIndex = Math.max(0, slideCount - slidesPerView);
@@ -193,6 +196,7 @@ export function useCarousel(parameters: UseCarouselParameters): UseCarouselRetur
     slideCount,
     direction,
     dragging,
+    setDragging,
     isAutoPlaying,
     goToSlide,
     goToNext,
