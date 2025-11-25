@@ -300,7 +300,7 @@ interface UseDroppableReturn {
 ---
 pr_id: PR-004
 title: Implement Internal Utilities
-cold_state: planned
+cold_state: complete
 priority: high
 complexity:
   score: 4
@@ -334,11 +334,11 @@ This PR now focuses on:
 2. Transform utilities for calculating visual offsets during drag
 
 **Acceptance Criteria:**
-- [ ] closestCenter collision algorithm works correctly
-- [ ] closestCorners collision algorithm works correctly
-- [ ] Transform utilities calculate drag positions accurately
-- [ ] All utilities are tree-shakeable
-- [ ] Performance acceptable for 100+ items
+- [x] closestCenter collision algorithm works correctly
+- [x] closestCorners collision algorithm works correctly
+- [x] Transform utilities calculate drag positions accurately
+- [x] All utilities are tree-shakeable
+- [x] Performance acceptable for 100+ items
 
 **Notes:**
 Export collision algorithms and transform utilities from DndContext for advanced users. Can be developed in parallel with PR-002 and PR-003.
