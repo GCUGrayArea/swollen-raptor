@@ -341,7 +341,7 @@ This PR now focuses on:
 - [ ] Performance acceptable for 100+ items
 
 **Notes:**
-Keep these internal (not exported from main index). Can be developed in parallel with PR-002 and PR-003.
+Export collision algorithms and transform utilities from DndContext for advanced users. Can be developed in parallel with PR-002 and PR-003.
 
 **Planning Notes (PR-004):**
 
