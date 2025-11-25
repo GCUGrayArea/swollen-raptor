@@ -582,7 +582,7 @@ export type { UseSortableOptions, UseSortableReturn } from './useSortable';
 ---
 pr_id: PR-006
 title: Implement SortableContext Provider
-cold_state: planned
+cold_state: complete
 priority: high
 complexity:
   score: 5
@@ -615,13 +615,13 @@ estimated_files:
 Implement the SortableContext provider that tracks item order for sortable lists. Manages the items array and provides sorting strategy (vertical, horizontal, grid) to child useSortable hooks. Also modifies useSortable to optionally consume SortableContext for intelligent sorting behavior.
 
 **Acceptance Criteria:**
-- [ ] Provider tracks item order
-- [ ] Supports vertical, horizontal, and grid strategies
-- [ ] Integrates with DndContext
-- [ ] Provides context values to useSortable hooks
-- [ ] TypeScript types properly exported
-- [ ] useSortable consumes SortableContext when available (optional)
-- [ ] Grid strategy requires `columns` prop (enforced via TypeScript discriminated union)
+- [x] Provider tracks item order
+- [x] Supports vertical, horizontal, and grid strategies
+- [x] Integrates with DndContext
+- [x] Provides context values to useSortable hooks
+- [x] TypeScript types properly exported
+- [x] useSortable consumes SortableContext when available (optional)
+- [x] Grid strategy requires `columns` prop (enforced via TypeScript discriminated union)
 
 **Notes:**
 Keep nested inside DndContext. Study how MUI handles nested contexts.
