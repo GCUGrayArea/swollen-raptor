@@ -17,7 +17,7 @@
 ---
 pr_id: PR-000
 title: Initialize Planning Documents
-cold_state: new
+cold_state: completed
 priority: critical
 complexity:
   score: 2
@@ -54,7 +54,7 @@ This PR is already complete. The planning documents have been created and approv
 ---
 pr_id: PR-001
 title: Implement DndContext Provider
-cold_state: new
+cold_state: planned
 priority: high
 complexity:
   score: 6
@@ -65,33 +65,140 @@ dependencies: [PR-000]
 estimated_files:
   - path: packages/mui-material/src/DndContext/DndContext.tsx
     action: create
-    description: Main context provider component
-  - path: packages/mui-material/src/DndContext/DndContext.d.ts
+    description: Main context provider component with state management
+  - path: packages/mui-material/src/DndContext/DndContextTypes.ts
     action: create
-    description: TypeScript declarations
-  - path: packages/mui-material/src/DndContext/dndContextClasses.ts
+    description: Type definitions (Active, Over, Coordinates, DragEvents, etc.)
+  - path: packages/mui-material/src/DndContext/useDndContext.ts
     action: create
-    description: CSS class definitions
+    description: Internal hook for useDraggable/useDroppable to access context
+  - path: packages/mui-material/src/DndContext/useDndMonitor.ts
+    action: create
+    description: Public hook for subscribing to drag lifecycle events
+  - path: packages/mui-material/src/DndContext/collision.ts
+    action: create
+    description: Basic rectIntersection collision detection
+  - path: packages/mui-material/src/DndContext/announcements.ts
+    action: create
+    description: Screen reader announcement utilities and defaults
   - path: packages/mui-material/src/DndContext/index.ts
     action: create
     description: Public exports
+  - path: packages/mui-material/src/index.d.ts
+    action: modify
+    description: Add DndContext type exports
   - path: packages/mui-material/src/index.ts
     action: modify
     description: Add DndContext export
 ---
 
 **Description:**
-Implement the core DndContext provider that manages global drag-and-drop state. This is the foundation that all draggable and droppable components will use. Handles drag lifecycle events (start, move, over, end, cancel), coordinates between draggables and droppables, and provides accessibility announcements.
+Implement the core DndContext provider that manages global drag-and-drop state. This is the coordination layer that all draggable and droppable components will use. No callback props - external event monitoring via `useDndMonitor` hook only.
+
+**Responsibilities:**
+1. Manage global drag state (`active`, `over`)
+2. Maintain registries of draggables and droppables
+3. Run collision detection to determine hover targets
+4. Provide accessibility announcements via live region
+5. Expose internal context for useDraggable/useDroppable
+6. Expose useDndMonitor for external event subscription
+
+**Key Types (DndContextTypes.ts):**
+```typescript
+type UniqueIdentifier = string | number;
+
+interface Active {
+  id: UniqueIdentifier;
+  data: Record<string, unknown>;
+  rect: DOMRect;
+}
+
+interface Over {
+  id: UniqueIdentifier;
+  data: Record<string, unknown>;
+  rect: DOMRect;
+}
+
+interface Coordinates { x: number; y: number; }
+
+interface DragStartEvent { active: Active; }
+interface DragMoveEvent { active: Active; over: Over | null; delta: Coordinates; }
+interface DragOverEvent { active: Active; over: Over; }
+interface DragEndEvent { active: Active; over: Over | null; }
+interface DragCancelEvent { active: Active; }
+
+type CollisionDetection = (args: {
+  active: Active;
+  droppables: Map<UniqueIdentifier, DroppableEntry>;
+  pointerCoordinates: Coordinates;
+}) => UniqueIdentifier | null;
+```
+
+**DndContext Props:**
+```typescript
+interface DndContextProps {
+  children: React.ReactNode;
+  collisionDetection?: CollisionDetection;  // Default: rectIntersection
+  accessibility?: {
+    announcements?: AnnouncementCallbacks;
+    screenReaderInstructions?: string;
+  };
+}
+```
+
+**Internal Context Value (useDndContext):**
+```typescript
+interface DndContextValue {
+  active: Active | null;
+  over: Over | null;
+
+  // Registry methods (called by useDraggable/useDroppable)
+  registerDraggable: (id: UniqueIdentifier, node: HTMLElement, data?: Record<string, unknown>) => void;
+  unregisterDraggable: (id: UniqueIdentifier) => void;
+  registerDroppable: (id: UniqueIdentifier, node: HTMLElement, data?: Record<string, unknown>) => void;
+  unregisterDroppable: (id: UniqueIdentifier) => void;
+
+  // Drag lifecycle (called by useDraggable)
+  dragStart: (id: UniqueIdentifier) => void;
+  dragMove: (coordinates: Coordinates) => void;
+  dragEnd: () => void;
+  dragCancel: () => void;
+}
+```
+
+**useDndMonitor Hook:**
+```typescript
+interface DndMonitorCallbacks {
+  onDragStart?: (event: DragStartEvent) => void;
+  onDragMove?: (event: DragMoveEvent) => void;
+  onDragOver?: (event: DragOverEvent) => void;
+  onDragEnd?: (event: DragEndEvent) => void;
+  onDragCancel?: (event: DragCancelEvent) => void;
+}
+
+function useDndMonitor(callbacks: DndMonitorCallbacks): void;
+```
+
+**Implementation Notes:**
+- Use `useRef` for registries to avoid re-renders on registration changes
+- Memoize context value with `useMemo` to prevent child re-renders
+- Throttle collision detection during dragMove via `requestAnimationFrame`
+- Use MUI's `useEnhancedEffect` for SSR-safe DOM measurements
+- Live region for announcements: `<div aria-live="assertive" />`
+- Default collision: `rectIntersection` (simple bounding box overlap)
 
 **Acceptance Criteria:**
-- [ ] DndContext provider manages drag state
-- [ ] Event callbacks (onDragStart, onDragMove, onDragOver, onDragEnd, onDragCancel) work correctly
-- [ ] Context values accessible to child components
-- [ ] TypeScript types properly exported
-- [ ] Follows MUI component patterns (styled, classes, etc.)
+- [ ] DndContext provider renders children and provides context
+- [ ] Registries track draggables and droppables correctly
+- [ ] `active` state updates on dragStart, clears on dragEnd/dragCancel
+- [ ] `over` state updates based on collision detection during dragMove
+- [ ] `useDndMonitor` callbacks fire at correct lifecycle points
+- [ ] Screen reader announcements work for all drag states
+- [ ] TypeScript types properly exported from index
+- [ ] SSR-safe (no DOM access during initial render)
 
 **Notes:**
-This is a foundational component. Keep the API minimal but extensible. Study MUI's existing context patterns (ThemeProvider, etc.) for consistency.
+No callback props on DndContext - use `useDndMonitor` hook for event subscription to avoid render loop footguns. No DragOverlay component yet. No sensor abstraction - useDraggable will handle pointer events directly.
 
 ---
 
