@@ -5,50 +5,26 @@ import {
   Typography,
   AppBar,
   Toolbar,
-  Button,
   Card,
   CardContent,
   CardMedia,
   Chip,
-  Stack,
-  IconButton,
   Divider,
+  Switch,
+  FormControlLabel,
+  Paper,
+  Stack,
 } from '@mui/material';
-import {
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
-} from '@mui/icons-material';
 import { Carousel } from '@mui/carousel';
 import DemoSection from './components/DemoSection';
 import { imageSlides, testimonials } from './data/sampleData';
 
 function App() {
-  // State for image carousel
-  const [imageIndex, setImageIndex] = React.useState(0);
-
-  // State for testimonials carousel
-  const [testimonialIndex, setTestimonialIndex] = React.useState(0);
-
-  // State for auto-play carousel
-  const [autoPlayIndex, setAutoPlayIndex] = React.useState(0);
-
-  // Handlers for image carousel
-  const handleImageNext = () => {
-    setImageIndex((prev) => (prev + 1) % imageSlides.length);
-  };
-
-  const handleImagePrev = () => {
-    setImageIndex((prev) => (prev - 1 + imageSlides.length) % imageSlides.length);
-  };
-
-  // Handlers for testimonials carousel
-  const handleTestimonialNext = () => {
-    setTestimonialIndex((prev) => (prev + 1) % testimonials.length);
-  };
-
-  const handleTestimonialPrev = () => {
-    setTestimonialIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-  };
+  // State for feature toggles
+  const [showNav, setShowNav] = React.useState(true);
+  const [showIndicators, setShowIndicators] = React.useState(true);
+  const [enableLoop, setEnableLoop] = React.useState(false);
+  const [autoPlay, setAutoPlay] = React.useState(false);
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -58,7 +34,7 @@ function App() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             @mui/carousel Demo
           </Typography>
-          <Chip label="Early Preview" color="secondary" size="small" />
+          <Chip label="v0.1.0" color="secondary" size="small" />
         </Toolbar>
       </AppBar>
 
@@ -75,25 +51,53 @@ function App() {
           <Typography variant="h3" component="h1" gutterBottom>
             Material UI Carousel
           </Typography>
-          <Typography variant="h6" sx={{ mb: 4, opacity: 0.9 }}>
-            A production-ready carousel component that seamlessly integrates with Material UI
+          <Typography variant="h6" sx={{ mb: 2, opacity: 0.9 }}>
+            A production-ready carousel with built-in navigation, swipe gestures, and accessibility
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.8 }}>
-            Note: Navigation buttons are not yet built into the component (PR-004 pending).
-            This demo uses external controlled navigation.
-          </Typography>
+          <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap">
+            <Chip label="Navigation" size="small" sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
+            <Chip label="Swipe/Drag" size="small" sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
+            <Chip label="Auto-play" size="small" sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
+            <Chip label="Transitions" size="small" sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
+            <Chip label="Accessible" size="small" sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
+          </Stack>
         </Container>
       </Box>
 
-      {/* Image Carousel Demo */}
+      {/* Interactive Image Carousel Demo */}
       <DemoSection
         title="Image Carousel"
-        description="A beautiful image carousel with external navigation controls. Images are displayed with captions and smooth transitions."
+        description="Try the controls below to toggle features. You can also swipe/drag the carousel!"
       >
         <Box>
+          {/* Feature Controls */}
+          <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+            <Stack direction="row" spacing={3} flexWrap="wrap" justifyContent="center">
+              <FormControlLabel
+                control={<Switch checked={showNav} onChange={(e) => setShowNav(e.target.checked)} />}
+                label="Navigation Arrows"
+              />
+              <FormControlLabel
+                control={<Switch checked={showIndicators} onChange={(e) => setShowIndicators(e.target.checked)} />}
+                label="Dot Indicators"
+              />
+              <FormControlLabel
+                control={<Switch checked={enableLoop} onChange={(e) => setEnableLoop(e.target.checked)} />}
+                label="Loop"
+              />
+              <FormControlLabel
+                control={<Switch checked={autoPlay} onChange={(e) => setAutoPlay(e.target.checked)} />}
+                label="Auto-play"
+              />
+            </Stack>
+          </Paper>
+
           <Carousel
-            activeIndex={imageIndex}
-            onChange={(newIndex) => setImageIndex(newIndex)}
+            hideNavigation={!showNav}
+            hideIndicators={!showIndicators}
+            enableLoop={enableLoop}
+            autoPlay={autoPlay}
+            autoPlayInterval={3000}
             aria-label="Image carousel"
           >
             {imageSlides.map((slide) => (
@@ -123,70 +127,9 @@ function App() {
             ))}
           </Carousel>
 
-          {/* External Navigation Controls */}
-          <Stack
-            direction="row"
-            spacing={2}
-            alignItems="center"
-            justifyContent="center"
-            sx={{ mt: 3 }}
-          >
-            <IconButton
-              onClick={handleImagePrev}
-              color="primary"
-              size="large"
-              aria-label="Previous slide"
-              sx={{
-                bgcolor: 'action.hover',
-                '&:hover': { bgcolor: 'action.selected' },
-              }}
-            >
-              <ChevronLeftIcon />
-            </IconButton>
-
-            <Box sx={{ textAlign: 'center', minWidth: 100 }}>
-              <Typography variant="body2" color="text.secondary">
-                Slide
-              </Typography>
-              <Typography variant="h6">
-                {imageIndex + 1} / {imageSlides.length}
-              </Typography>
-            </Box>
-
-            <IconButton
-              onClick={handleImageNext}
-              color="primary"
-              size="large"
-              aria-label="Next slide"
-              sx={{
-                bgcolor: 'action.hover',
-                '&:hover': { bgcolor: 'action.selected' },
-              }}
-            >
-              <ChevronRightIcon />
-            </IconButton>
-          </Stack>
-
-          {/* Slide Indicators */}
-          <Stack direction="row" spacing={1} justifyContent="center" sx={{ mt: 2 }}>
-            {imageSlides.map((_, index) => (
-              <Box
-                key={index}
-                onClick={() => setImageIndex(index)}
-                sx={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: '50%',
-                  bgcolor: index === imageIndex ? 'primary.main' : 'action.disabled',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s',
-                  '&:hover': {
-                    bgcolor: index === imageIndex ? 'primary.dark' : 'action.hover',
-                  },
-                }}
-              />
-            ))}
-          </Stack>
+          <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mt: 2 }}>
+            💡 Tip: Try swiping left/right on touch devices, or click and drag with your mouse!
+          </Typography>
         </Box>
       </DemoSection>
 
@@ -195,88 +138,54 @@ function App() {
       {/* Testimonials Carousel Demo */}
       <DemoSection
         title="Testimonials Carousel"
-        description="Display customer testimonials with elegant card-based design and smooth navigation."
+        description="Customer testimonials with elegant card-based design. Looping enabled for continuous browsing."
       >
-        <Box>
-          <Carousel
-            activeIndex={testimonialIndex}
-            onChange={(newIndex) => setTestimonialIndex(newIndex)}
-            aria-label="Testimonials carousel"
-          >
-            {testimonials.map((testimonial) => (
-              <Card
-                key={testimonial.id}
-                elevation={0}
-                sx={{
-                  minHeight: 280,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  p: 4,
-                  bgcolor: 'background.default',
-                }}
-              >
-                <CardContent>
-                  <Typography
-                    variant="h5"
-                    component="blockquote"
-                    sx={{
-                      fontStyle: 'italic',
-                      mb: 3,
-                      color: 'text.primary',
-                      '&::before': { content: '"""', color: 'primary.main', fontSize: '2rem' },
-                      '&::after': { content: '"""', color: 'primary.main', fontSize: '2rem' },
-                    }}
-                  >
-                    {testimonial.quote}
+        <Carousel
+          enableLoop
+          aria-label="Testimonials carousel"
+        >
+          {testimonials.map((testimonial) => (
+            <Card
+              key={testimonial.id}
+              elevation={0}
+              sx={{
+                minHeight: 280,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                p: 4,
+                bgcolor: 'background.default',
+              }}
+            >
+              <CardContent>
+                <Typography
+                  variant="h5"
+                  component="blockquote"
+                  sx={{
+                    fontStyle: 'italic',
+                    mb: 3,
+                    color: 'text.primary',
+                    '&::before': { content: '"""', color: 'primary.main', fontSize: '2rem' },
+                    '&::after': { content: '"""', color: 'primary.main', fontSize: '2rem' },
+                  }}
+                >
+                  {testimonial.quote}
+                </Typography>
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    {testimonial.author}
                   </Typography>
-                  <Box sx={{ mt: 3 }}>
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {testimonial.author}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {testimonial.role}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {testimonial.company}
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </Carousel>
-
-          {/* External Navigation Controls */}
-          <Stack
-            direction="row"
-            spacing={2}
-            alignItems="center"
-            justifyContent="center"
-            sx={{ mt: 3 }}
-          >
-            <Button
-              onClick={handleTestimonialPrev}
-              variant="outlined"
-              startIcon={<ChevronLeftIcon />}
-              size="large"
-            >
-              Previous
-            </Button>
-
-            <Typography variant="body1" color="text.secondary">
-              {testimonialIndex + 1} of {testimonials.length}
-            </Typography>
-
-            <Button
-              onClick={handleTestimonialNext}
-              variant="outlined"
-              endIcon={<ChevronRightIcon />}
-              size="large"
-            >
-              Next
-            </Button>
-          </Stack>
-        </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    {testimonial.role}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {testimonial.company}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          ))}
+        </Carousel>
       </DemoSection>
 
       <Divider />
@@ -284,12 +193,10 @@ function App() {
       {/* Auto-Play Carousel Demo */}
       <DemoSection
         title="Auto-Play Carousel"
-        description="Automatically advancing carousel with a 3-second interval. Perfect for hero sections and promotional content."
+        description="Automatically advances every 3 seconds. Pauses on hover or focus for accessibility."
       >
         <Box>
           <Carousel
-            activeIndex={autoPlayIndex}
-            onChange={(newIndex) => setAutoPlayIndex(newIndex)}
             autoPlay
             autoPlayInterval={3000}
             enableLoop
@@ -327,9 +234,6 @@ function App() {
                   }}
                 >
                   <Typography variant="h4">{slide.caption}</Typography>
-                  <Typography variant="body1" sx={{ mt: 1 }}>
-                    Slide {slide.id} of {imageSlides.slice(0, 3).length}
-                  </Typography>
                 </Box>
               </Box>
             ))}
@@ -341,9 +245,39 @@ function App() {
             textAlign="center"
             sx={{ mt: 2, color: 'text.secondary' }}
           >
-            This carousel automatically advances every 3 seconds and loops continuously
+            ⏸️ Hover over the carousel to pause auto-play
           </Typography>
         </Box>
+      </DemoSection>
+
+      <Divider />
+
+      {/* Fade Transition Demo */}
+      <DemoSection
+        title="Fade Transition"
+        description="Smooth crossfade effect between slides using the transition='fade' prop."
+      >
+        <Carousel
+          transition="fade"
+          enableLoop
+          aria-label="Fade transition carousel"
+        >
+          {imageSlides.slice(0, 3).map((slide) => (
+            <Box key={slide.id}>
+              <CardMedia
+                component="img"
+                image={slide.url}
+                alt={slide.alt}
+                sx={{
+                  width: '100%',
+                  height: 350,
+                  objectFit: 'cover',
+                  borderRadius: 1,
+                }}
+              />
+            </Box>
+          ))}
+        </Carousel>
       </DemoSection>
 
       {/* Footer */}
