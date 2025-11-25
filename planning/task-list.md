@@ -120,7 +120,7 @@ COMPLETED. Implementation includes:
 ---
 pr_id: PR-002
 title: Implement useDraggable Hook
-cold_state: planned
+cold_state: complete
 priority: high
 complexity:
   score: 6
@@ -147,12 +147,12 @@ estimated_files:
 Implement the useDraggable hook that makes any element draggable via Pointer Events. Returns attributes, listeners, ref setter, transform position, and drag state. Supports keyboard activation (Enter/Space to grab, arrows to move, Escape to cancel).
 
 **Acceptance Criteria:**
-- [ ] Hook returns attributes, listeners, setNodeRef, transform, isDragging
-- [ ] Pointer events (pointerdown, pointermove, pointerup, pointercancel) handled correctly
-- [ ] Keyboard navigation works (Enter/Space, arrows, Escape)
-- [ ] ARIA attributes provided for accessibility
-- [ ] Integrates with DndContext for state coordination
-- [ ] Works on touch and mouse devices
+- [x] Hook returns attributes, listeners, setNodeRef, transform, isDragging
+- [x] Pointer events (pointerdown, pointermove, pointerup, pointercancel) handled correctly
+- [x] Keyboard navigation works (Enter/Space, arrows, Escape)
+- [x] ARIA attributes provided for accessibility
+- [x] Integrates with DndContext for state coordination
+- [x] Works on touch and mouse devices
 
 **Notes:**
 Use MUI's useEventCallback for stable references. Ensure SSR compatibility with useEnhancedEffect.
