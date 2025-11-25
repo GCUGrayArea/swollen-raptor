@@ -1527,7 +1527,7 @@ Must work with screen readers. Follow WAI-ARIA carousel patterns. KEYBOARD_KEYS 
 ---
 pr_id: PR-009
 title: Implement ARIA Attributes and Screen Reader Support
-cold_state: planned
+cold_state: complete
 priority: critical
 complexity:
   score: 5
@@ -1723,12 +1723,12 @@ Enhance accessibility with comprehensive ARIA attributes and screen reader suppo
 - [x] aria-live regions for announcements (already complete)
 - [x] Navigation controls have descriptive aria-labels (already complete)
 - [x] aria-hidden on slides (already complete - only active slide visible to screen readers)
-- [ ] aria-controls relationships between controls and slides
-- [ ] Roving tabindex on indicators (only active in tab order)
-- [ ] Keyboard navigation within indicator group (arrow keys, respects enableLoop)
-- [ ] Visually hidden instructions for screen readers
-- [ ] aria-describedby linking carousel to instructions
-- [ ] Unique IDs on carousel, slides container, and each slide
+- [x] aria-controls relationships between controls and slides
+- [x] Roving tabindex on indicators (only active in tab order)
+- [x] Keyboard navigation within indicator group (arrow keys, respects enableLoop)
+- [x] Visually hidden instructions for screen readers
+- [x] aria-describedby linking carousel to instructions
+- [x] Unique IDs on carousel, slides container, and each slide
 - [ ] Passes accessibility audit tools (aXe, Lighthouse)
 
 **Notes:**
