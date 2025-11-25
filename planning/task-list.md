@@ -216,7 +216,7 @@ interface UseDraggableReturn {
 ---
 pr_id: PR-003
 title: Implement useDroppable Hook
-cold_state: planned
+cold_state: complete
 priority: high
 complexity:
   score: 5
@@ -243,14 +243,20 @@ estimated_files:
 Implement the useDroppable hook that designates an element as a drop target. Returns ref setter, isOver state, and information about the currently active draggable. Supports nested drop zones with proper event propagation.
 
 **Acceptance Criteria:**
-- [ ] Hook returns setNodeRef, isOver, active
-- [ ] Correctly detects when draggable is over drop zone
-- [ ] Provides information about active draggable item
-- [ ] Handles nested drop zones correctly
-- [ ] Integrates with DndContext
+- [x] Hook returns setNodeRef, isOver, active
+- [x] Correctly detects when draggable is over drop zone
+- [x] Provides information about active draggable item
+- [x] Handles nested drop zones correctly
+- [x] Integrates with DndContext
 
 **Notes:**
-Can be developed in parallel with PR-002 since both depend only on DndContext.
+COMPLETED. Implementation includes:
+- Simple hook that registers/unregisters with DndContext
+- Derives isOver from context's over state
+- Passes through active draggable info from context
+- Uses MUI patterns: useEventCallback, useEnhancedEffect
+- Full TypeScript types and JSDoc documentation
+- Examples showing basic usage and custom data filtering
 
 **Planning Notes (PR-003):**
 
