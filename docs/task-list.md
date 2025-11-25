@@ -54,7 +54,7 @@ This PR is already complete. The planning documents have been created and approv
 ---
 pr_id: PR-001
 title: Implement DndContext Provider
-cold_state: planned
+cold_state: completed
 priority: high
 complexity:
   score: 6
