@@ -88,6 +88,9 @@ export * from './Checkbox';
 export { default as Chip } from './Chip';
 export * from './Chip';
 
+export { default as DraggableChip } from './Chip/DraggableChip';
+export * from './Chip/DraggableChip';
+
 export { default as CircularProgress } from './CircularProgress';
 export * from './CircularProgress';
 
@@ -124,6 +127,9 @@ export * from './DialogContentText';
 export { default as DialogTitle } from './DialogTitle';
 export * from './DialogTitle';
 
+export { default as DndContext } from './DndContext';
+export * from './DndContext';
+
 export { default as Divider } from './Divider';
 export * from './Divider';
 
@@ -159,6 +165,9 @@ export { GridLegacyProps, GridLegacyTypeMap } from './GridLegacy';
 
 export { default as Grid } from './Grid';
 export * from './Grid';
+
+export { default as DraggableGridItem } from './Grid/DraggableGridItem';
+export * from './Grid/DraggableGridItem';
 
 export { default as Grow } from './Grow';
 export * from './Grow';
@@ -216,6 +225,9 @@ export * from './ListItemSecondaryAction';
 
 export { default as ListItemText } from './ListItemText';
 export * from './ListItemText';
+
+export { default as DraggableListItem } from './ListItem/DraggableListItem';
+export * from './ListItem/DraggableListItem';
 
 export { default as ListSubheader } from './ListSubheader';
 export * from './ListSubheader';
@@ -292,6 +304,9 @@ export * from './Snackbar';
 export { default as SnackbarContent } from './SnackbarContent';
 export * from './SnackbarContent';
 
+export { default as SortableContext } from './SortableContext';
+export * from './SortableContext';
+
 export { default as SpeedDial } from './SpeedDial';
 export * from './SpeedDial';
 
@@ -364,6 +379,9 @@ export * from './TablePaginationActions';
 export { default as TableRow } from './TableRow';
 export * from './TableRow';
 
+export { default as DraggableTableRow } from './TableRow/DraggableTableRow';
+export * from './TableRow/DraggableTableRow';
+
 export { default as TableSortLabel } from './TableSortLabel';
 export * from './TableSortLabel';
 
@@ -405,6 +423,15 @@ export * from './Zoom';
 
 export { default as useAutocomplete } from './useAutocomplete';
 export * from './useAutocomplete';
+
+export { default as useDraggable } from './useDraggable';
+export * from './useDraggable';
+
+export { default as useDroppable } from './useDroppable';
+export * from './useDroppable';
+
+export { default as useSortable } from './useSortable';
+export * from './useSortable';
 
 export { default as GlobalStyles } from './GlobalStyles';
 export * from './GlobalStyles';
