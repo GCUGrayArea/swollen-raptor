@@ -12,6 +12,7 @@ import { useTheme } from '@mui/material/styles';
 import { useCarousel } from '../hooks/useCarousel';
 import { useSwipe } from '../hooks/useSwipe';
 import { useKeyboard } from '../hooks/useKeyboard';
+import { useResponsive } from '../hooks/useResponsive';
 import { CarouselProvider } from '../CarouselContext';
 import { CarouselContextValue } from '../types';
 import {
@@ -171,6 +172,12 @@ const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(function Carous
     ...other
   } = props;
 
+  // Resolve responsive slidesPerView value
+  const { value: effectiveSlidesPerView } = useResponsive({
+    value: slidesPerView,
+    defaultValue: DEFAULT_SLIDES_PER_VIEW,
+  });
+
   // Use carousel state management hook
   const {
     activeIndex,
@@ -196,7 +203,7 @@ const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(function Carous
     disableGestures,
     enableLoop,
     onChange,
-    slidesPerView,
+    slidesPerView: effectiveSlidesPerView,
     spacing,
     transition,
     transitionDuration,
@@ -468,9 +475,19 @@ Carousel.propTypes /* remove-proptypes */ = {
   prevIcon: PropTypes.node,
   /**
    * Number of slides visible at once.
+   * Can be a number or a responsive object with breakpoint values.
    * @default 1
    */
-  slidesPerView: PropTypes.number,
+  slidesPerView: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.shape({
+      xs: PropTypes.number,
+      sm: PropTypes.number,
+      md: PropTypes.number,
+      lg: PropTypes.number,
+      xl: PropTypes.number,
+    }),
+  ]),
   /**
    * The extra props for the slot components.
    * @default {}

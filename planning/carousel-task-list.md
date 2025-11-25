@@ -1351,7 +1351,7 @@ Build on existing auto-play scaffolding in useCarousel. Create dedicated useAuto
 ---
 pr_id: PR-008
 title: Add Keyboard Navigation Support
-cold_state: planned
+cold_state: complete
 priority: high
 complexity:
   score: 4
@@ -1570,7 +1570,7 @@ Test with NVDA, JAWS, and VoiceOver. Reference WAI-ARIA carousel pattern.
 ---
 pr_id: PR-010
 title: Add Responsive Behavior and Breakpoints
-cold_state: planned
+cold_state: complete
 priority: medium
 complexity:
   score: 4
