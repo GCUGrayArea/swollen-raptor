@@ -178,6 +178,7 @@ const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(function Carous
     resumeAutoPlay,
     slides,
     ownerState: hookOwnerState,
+    autoPlayHandlers,
   } = useCarousel({
     activeIndex: activeIndexProp,
     defaultActiveIndex,
@@ -331,7 +332,7 @@ const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(function Carous
 
   return (
     <CarouselProvider value={contextValue}>
-      <RootSlot {...rootProps}>
+      <RootSlot {...rootProps} {...autoPlayHandlers}>
         {renderSlides()}
         {!hideNavigation && (
           <CarouselNavigation
