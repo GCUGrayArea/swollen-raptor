@@ -1527,7 +1527,7 @@ Must work with screen readers. Follow WAI-ARIA carousel patterns. KEYBOARD_KEYS 
 ---
 pr_id: PR-009
 title: Implement ARIA Attributes and Screen Reader Support
-cold_state: new
+cold_state: complete
 priority: critical
 complexity:
   score: 5
