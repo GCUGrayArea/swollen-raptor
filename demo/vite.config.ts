@@ -7,18 +7,31 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      // Point to local carousel source
       '@mui/carousel': path.resolve(__dirname, '../packages/mui-carousel/src'),
-      // Dedupe React to prevent multiple copies (critical for hooks)
-      'react': path.resolve(__dirname, 'node_modules/react'),
-      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
-      'react/jsx-runtime': path.resolve(__dirname, 'node_modules/react/jsx-runtime'),
-      'react/jsx-dev-runtime': path.resolve(__dirname, 'node_modules/react/jsx-dev-runtime'),
     },
+    // Ensure these resolve from demo's node_modules
+    dedupe: ['react', 'react-dom', '@emotion/react', '@emotion/styled'],
   },
   server: {
     port: 3000,
   },
   optimizeDeps: {
-    include: ['react', 'react-dom'],
+    // Exclude the aliased local package from optimization
+    exclude: ['@mui/carousel'],
+    // Include dependencies that @mui/carousel needs
+    include: [
+      'react',
+      'react-dom',
+      'react/jsx-runtime',
+      'react/jsx-dev-runtime',
+      '@mui/material',
+      '@mui/system',
+      '@mui/utils',
+      '@emotion/react',
+      '@emotion/styled',
+      'react-transition-group',
+      'clsx',
+    ],
   },
 });
