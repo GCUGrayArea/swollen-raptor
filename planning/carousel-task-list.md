@@ -1483,11 +1483,17 @@ planning_notes: |
 
   ### Edge Cases to Handle
   - Focus should not be trapped in carousel
-  - Tab should move to next focusable element (navigation buttons, indicators)
+  - Tab is NOT captured - let it flow naturally through focusable elements
+  - Keyboard navigation works when ANY element in carousel has focus (use event bubbling)
   - Escape only pauses if auto-play is active
   - Number keys beyond slideCount should be ignored
   - Modifier keys (Ctrl+Arrow, etc.) should not trigger navigation
   - Prevent default for handled keys to avoid page scrolling
+
+  ### Focus Scope Strategy
+  Attach onKeyDown to CarouselRoot. Since events bubble, this will catch keyboard
+  events from anywhere within the carousel (nav buttons, indicators, slide content).
+  This matches user expectation: "if I'm focused somewhere in the carousel, arrow keys should work."
 
   ### Accessibility Considerations
   - visible focus indicator (focus-visible)
@@ -1502,17 +1508,17 @@ Implement comprehensive keyboard navigation including arrow keys, Home/End, Tab,
 **Acceptance Criteria:**
 - [ ] Arrow keys navigate next/previous
 - [ ] Home/End go to first/last slide
-- [ ] Tab navigates through interactive elements
 - [ ] Escape stops auto-play
 - [ ] Number keys (1-9) for direct access
 - [ ] Focus management works correctly
-- [ ] Keyboard traps prevented
+- [ ] Keyboard works when focus is anywhere in carousel (root, buttons, indicators, content)
+- [ ] Tab flows naturally (not captured) to nav buttons, indicators, and beyond
 - [ ] RTL support (arrow directions swap)
 - [ ] Modifier keys don't trigger navigation
 - [ ] Focus ring visible when focused via keyboard
 
 **Notes:**
-Must work with screen readers. Follow WAI-ARIA carousel patterns. KEYBOARD_KEYS constants already exist in utils/constants.ts. The disableKeyboard prop exists but isn't wired up yet.
+Must work with screen readers. Follow WAI-ARIA carousel patterns. KEYBOARD_KEYS constants already exist in utils/constants.ts. The disableKeyboard prop exists but isn't wired up yet. Tab is NOT captured - let it flow naturally through focusable elements.
 
 ## Block 3: Accessibility & Responsive (Depends on Block 2)
 
@@ -1729,6 +1735,14 @@ planning_notes: |
   - 1 slide on mobile (xs)
   - 2 slides on tablet (sm/md)
   - 3+ slides on desktop (lg/xl)
+
+  ### Scope Decision: Only slidesPerView is Responsive
+  For v1, only `slidesPerView` supports ResponsiveValue. Other props like `spacing`
+  remain simple types. Rationale:
+  - `slidesPerView` is the primary responsive use case (1 on mobile → 3 on desktop)
+  - Users can use `sx` prop with breakpoint values for responsive spacing if needed
+  - Adding ResponsiveValue to multiple props increases type complexity significantly
+  - Better to ship focused v1 and add more responsive props in v2 if there's demand
 ---
 
 **Description:**
