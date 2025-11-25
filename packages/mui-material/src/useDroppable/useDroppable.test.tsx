@@ -6,8 +6,23 @@ import { useDraggable } from '../useDraggable/useDraggable';
 import { DndContext } from '../DndContext/DndContext';
 import type { UseDroppableOptions } from './useDroppable';
 
+// Mock pointer capture methods globally since JSDOM doesn't fully support them
+// Always override even if defined, as JSDOM's implementation may not work correctly
+Element.prototype.setPointerCapture = function () {};
+Element.prototype.releasePointerCapture = function () {};
+Element.prototype.hasPointerCapture = function () {
+  return true;
+};
+
 describe('useDroppable', () => {
   const { render } = createRenderer();
+
+  // Helper to mock pointer capture methods which aren't fully supported in JSDOM
+  const mockPointerCapture = (element: HTMLElement) => {
+    element.setPointerCapture = () => {};
+    element.releasePointerCapture = () => {};
+    element.hasPointerCapture = () => true;
+  };
 
   const DroppableTestComponent = (
     props: UseDroppableOptions & {
@@ -135,6 +150,9 @@ describe('useDroppable', () => {
       const draggableElement = screen.getByTestId('draggable-draggable-1');
       const droppableElement = screen.getByTestId('droppable-zone');
 
+      // Mock pointer capture for JSDOM
+      mockPointerCapture(draggableElement);
+
       // Mock getBoundingClientRect for collision detection
       draggableElement.getBoundingClientRect = () => ({
         left: 10,
@@ -163,18 +181,16 @@ describe('useDroppable', () => {
       expect(droppableHookReturn!.isOver).to.equal(false);
 
       // Start drag
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 35,
         clientY: 35,
-        pointerId: 1,
       });
 
       // Move over droppable
-      fireEvent.pointerMove(document, {
+      fireEvent.mouseMove(document, {
         clientX: 100,
         clientY: 100,
-        pointerId: 1,
       });
 
       // Wait for collision detection (throttled by RAF)
@@ -228,6 +244,9 @@ describe('useDroppable', () => {
       const draggableElement = screen.getByTestId('draggable-draggable-1');
       const droppableElements = screen.getAllByTestId('droppable-zone');
 
+      // Mock pointer capture for JSDOM
+      mockPointerCapture(draggableElement);
+
       // Mock getBoundingClientRect
       draggableElement.getBoundingClientRect = () => ({
         left: 10,
@@ -266,18 +285,16 @@ describe('useDroppable', () => {
       });
 
       // Start drag
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 35,
         clientY: 35,
-        pointerId: 1,
       });
 
       // Move over first droppable
-      fireEvent.pointerMove(document, {
+      fireEvent.mouseMove(document, {
         clientX: 100,
         clientY: 100,
-        pointerId: 1,
       });
 
       // Wait for collision detection
@@ -309,6 +326,9 @@ describe('useDroppable', () => {
 
       const draggableElement = screen.getByTestId('draggable-draggable-1');
 
+      // Mock pointer capture for JSDOM
+      mockPointerCapture(draggableElement);
+
       draggableElement.getBoundingClientRect = () => ({
         left: 0,
         top: 0,
@@ -324,11 +344,10 @@ describe('useDroppable', () => {
       expect(hookReturn!.active).to.equal(null);
 
       // Start drag
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
       await waitFor(() => {
@@ -390,6 +409,9 @@ describe('useDroppable', () => {
 
       const draggableElement = screen.getByTestId('draggable-with-data');
 
+      // Mock pointer capture for JSDOM
+      mockPointerCapture(draggableElement);
+
       draggableElement.getBoundingClientRect = () => ({
         left: 0,
         top: 0,
@@ -403,11 +425,10 @@ describe('useDroppable', () => {
       });
 
       // Start drag
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
       await waitFor(() => {
@@ -508,6 +529,9 @@ describe('useDroppable', () => {
       const droppable1Element = screen.getByTestId('droppable-1');
       const droppable2Element = screen.getByTestId('droppable-2');
 
+      // Mock pointer capture for JSDOM
+      mockPointerCapture(draggableElement);
+
       // Mock getBoundingClientRect
       draggableElement.getBoundingClientRect = () => ({
         left: 10,
@@ -546,18 +570,16 @@ describe('useDroppable', () => {
       });
 
       // Start drag
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 35,
         clientY: 35,
-        pointerId: 1,
       });
 
       // Move over first droppable
-      fireEvent.pointerMove(document, {
+      fireEvent.mouseMove(document, {
         clientX: 100,
         clientY: 100,
-        pointerId: 1,
       });
 
       await waitFor(
@@ -581,10 +603,9 @@ describe('useDroppable', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerMove(document, {
+      fireEvent.mouseMove(document, {
         clientX: 350,
         clientY: 100,
-        pointerId: 1,
       });
 
       await waitFor(
@@ -619,6 +640,9 @@ describe('useDroppable', () => {
 
       const draggableElement = screen.getByTestId('draggable-draggable-1');
 
+      // Mock pointer capture for JSDOM
+      mockPointerCapture(draggableElement);
+
       draggableElement.getBoundingClientRect = () => ({
         left: 0,
         top: 0,
@@ -632,11 +656,10 @@ describe('useDroppable', () => {
       });
 
       // Start drag
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
       // Unmount while dragging

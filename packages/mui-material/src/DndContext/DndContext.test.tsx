@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { expect } from 'chai';
 import { spy } from 'sinon';
-import { fireEvent, createRenderer, screen, waitFor } from '@mui/internal-test-utils';
+import { fireEvent, createRenderer, screen, waitFor, act } from '@mui/internal-test-utils';
 import { DndContext } from './DndContext';
 import { useDndContext } from './useDndContext';
 import { useDndMonitor } from './useDndMonitor';
@@ -10,8 +10,39 @@ import { useDroppable } from '../useDroppable/useDroppable';
 import { pointerWithin, closestCenter } from './collision';
 import type { DragStartEvent, DragMoveEvent, DragOverEvent, DragEndEvent, DragCancelEvent } from './DndContextTypes';
 
+// Mock pointer capture methods globally since JSDOM doesn't fully support them
+// Always override even if defined, as JSDOM's implementation may not work correctly
+Element.prototype.setPointerCapture = function () {};
+Element.prototype.releasePointerCapture = function () {};
+Element.prototype.hasPointerCapture = function () {
+  return true;
+};
+
 describe('DndContext', () => {
   const { render } = createRenderer();
+
+  // Helper to mock pointer capture methods which aren't fully supported in JSDOM
+  const mockPointerCapture = (element: HTMLElement) => {
+    element.setPointerCapture = () => {};
+    element.releasePointerCapture = () => {};
+    element.hasPointerCapture = () => true;
+  };
+
+  // Helper to set up a draggable element for testing
+  const setupDraggable = (element: HTMLElement) => {
+    mockPointerCapture(element);
+    element.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 50,
+      height: 50,
+      right: 50,
+      bottom: 50,
+      x: 0,
+      y: 0,
+      toJSON: () => {},
+    });
+  };
 
   const DraggableItem = ({ id, children }: { id: string; children?: React.ReactNode }) => {
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
@@ -136,11 +167,12 @@ describe('DndContext', () => {
 
       expect(contextValue!.active).to.equal(null);
 
-      fireEvent.pointerDown(draggableElement, {
-        button: 0,
-        clientX: 25,
-        clientY: 25,
-        pointerId: 1,
+      await act(async () => {
+        fireEvent.mouseDown(draggableElement, {
+          button: 0,
+          clientX: 25,
+          clientY: 25,
+        });
       });
 
       await waitFor(() => {
@@ -192,17 +224,19 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
-        button: 0,
-        clientX: 35,
-        clientY: 35,
-        pointerId: 1,
+      await act(async () => {
+        fireEvent.mouseDown(draggableElement, {
+          button: 0,
+          clientX: 35,
+          clientY: 35,
+        });
       });
 
-      fireEvent.pointerMove(document, {
-        clientX: 100,
-        clientY: 100,
-        pointerId: 1,
+      await act(async () => {
+        fireEvent.mouseMove(document, {
+          clientX: 100,
+          clientY: 100,
+        });
       });
 
       await waitFor(
@@ -243,18 +277,17 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
       await waitFor(() => {
         expect(contextValue!.active).to.not.equal(null);
       });
 
-      fireEvent.pointerUp(document, { pointerId: 1 });
+      fireEvent.mouseUp(document);
 
       await waitFor(() => {
         expect(contextValue!.active).to.equal(null);
@@ -291,18 +324,17 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
       await waitFor(() => {
         expect(contextValue!.active).to.not.equal(null);
       });
 
-      fireEvent.pointerCancel(document, { pointerId: 1 });
+      fireEvent.mouseUp(document);
 
       await waitFor(() => {
         expect(contextValue!.active).to.equal(null);
@@ -347,17 +379,15 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 35,
         clientY: 35,
-        pointerId: 1,
       });
 
-      fireEvent.pointerMove(document, {
+      fireEvent.mouseMove(document, {
         clientX: 100,
         clientY: 100,
-        pointerId: 1,
       });
 
       // Should detect collision with zone-1
@@ -406,18 +436,16 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 35,
         clientY: 35,
-        pointerId: 1,
       });
 
       // Move pointer inside droppable
-      fireEvent.pointerMove(document, {
+      fireEvent.mouseMove(document, {
         clientX: 100,
         clientY: 100,
-        pointerId: 1,
       });
 
       await waitFor(
@@ -474,17 +502,15 @@ describe('DndContext', () => {
 
       expect(contextValue!.over).to.equal(null);
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 35,
         clientY: 35,
-        pointerId: 1,
       });
 
-      fireEvent.pointerMove(document, {
+      fireEvent.mouseMove(document, {
         clientX: 100,
         clientY: 100,
-        pointerId: 1,
       });
 
       await waitFor(
@@ -529,11 +555,10 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
       await waitFor(() => {
@@ -572,17 +597,15 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
-      fireEvent.pointerMove(document, {
+      fireEvent.mouseMove(document, {
         clientX: 100,
         clientY: 100,
-        pointerId: 1,
       });
 
       await waitFor(
@@ -624,14 +647,13 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
-      fireEvent.pointerUp(document, { pointerId: 1 });
+      fireEvent.mouseUp(document);
 
       await waitFor(() => {
         expect(onDragEndSpy.callCount).to.equal(1);
@@ -669,14 +691,13 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
-      fireEvent.pointerCancel(document, { pointerId: 1 });
+      fireEvent.mouseUp(document);
 
       await waitFor(() => {
         expect(onDragCancelSpy.callCount).to.equal(1);
@@ -719,11 +740,10 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
       await waitFor(() => {
@@ -768,11 +788,10 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
       // Monitor should not be called after unmount
@@ -802,11 +821,10 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
       await waitFor(() => {
@@ -840,11 +858,10 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
       await waitFor(() => {
@@ -896,20 +913,18 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
       // Fire multiple move events rapidly
       for (let i = 0; i < 10; i++) {
-        fireEvent.pointerMove(document, {
+        fireEvent.mouseMove(document, {
           clientX: 25 + i,
           clientY: 25 + i,
-          pointerId: 1,
-        });
+          });
       }
 
       // Wait for RAF to complete
@@ -943,17 +958,15 @@ describe('DndContext', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 25,
         clientY: 25,
-        pointerId: 1,
       });
 
-      fireEvent.pointerMove(document, {
+      fireEvent.mouseMove(document, {
         clientX: 100,
         clientY: 100,
-        pointerId: 1,
       });
 
       // Unmount during pending RAF

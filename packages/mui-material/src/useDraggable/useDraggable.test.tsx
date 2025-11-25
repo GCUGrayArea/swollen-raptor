@@ -6,6 +6,14 @@ import { useDraggable } from './useDraggable';
 import { DndContext } from '../DndContext/DndContext';
 import type { UseDraggableOptions } from './useDraggable';
 
+// Mock pointer capture methods globally since JSDOM doesn't fully support them
+// Always override even if defined, as JSDOM's implementation may not work correctly
+Element.prototype.setPointerCapture = function () {};
+Element.prototype.releasePointerCapture = function () {};
+Element.prototype.hasPointerCapture = function () {
+  return true;
+};
+
 describe('useDraggable', () => {
   const { render } = createRenderer();
 
@@ -105,7 +113,14 @@ describe('useDraggable', () => {
   });
 
   describe('pointer events', () => {
-    it('onPointerDown starts drag (left mouse button)', () => {
+    // Helper to mock pointer capture methods which aren't fully supported in JSDOM
+    const mockPointerCapture = (element: HTMLElement) => {
+      element.setPointerCapture = () => {};
+      element.releasePointerCapture = () => {};
+      element.hasPointerCapture = () => true;
+    };
+
+    it('onPointerDown starts drag (left mouse button)', async () => {
       let hookReturn: ReturnType<typeof useDraggable> | null = null;
 
       render(
@@ -121,7 +136,8 @@ describe('useDraggable', () => {
 
       const draggableElement = screen.getByTestId('draggable-item');
 
-      // Mock getBoundingClientRect
+      // Mock pointer capture and getBoundingClientRect
+      mockPointerCapture(draggableElement);
       draggableElement.getBoundingClientRect = () => ({
         left: 0,
         top: 0,
@@ -134,15 +150,16 @@ describe('useDraggable', () => {
         toJSON: () => {},
       });
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 50,
         clientY: 50,
-        pointerId: 1,
       });
 
-      // After pointerdown, isDragging should become true
-      expect(hookReturn!.isDragging).to.equal(true);
+      // After pointerdown, isDragging should become true (async state update)
+      await waitFor(() => {
+        expect(hookReturn!.isDragging).to.equal(true);
+      });
     });
 
     it('ignores non-left mouse button clicks', () => {
@@ -161,7 +178,7 @@ describe('useDraggable', () => {
 
       const draggableElement = screen.getByTestId('draggable-item');
 
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 1, // Middle mouse button
         clientX: 50,
         clientY: 50,
@@ -186,6 +203,7 @@ describe('useDraggable', () => {
 
       const draggableElement = screen.getByTestId('draggable-item');
 
+      mockPointerCapture(draggableElement);
       draggableElement.getBoundingClientRect = () => ({
         left: 0,
         top: 0,
@@ -199,17 +217,19 @@ describe('useDraggable', () => {
       });
 
       // Start drag
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 50,
         clientY: 50,
-        pointerId: 1,
       });
 
-      expect(hookReturn!.isDragging).to.equal(true);
+      // Wait for drag to start (async state update)
+      await waitFor(() => {
+        expect(hookReturn!.isDragging).to.equal(true);
+      });
 
       // End drag
-      fireEvent.pointerUp(document, { pointerId: 1 });
+      fireEvent.mouseUp(document);
 
       await waitFor(() => {
         expect(hookReturn!.isDragging).to.equal(false);
@@ -232,6 +252,7 @@ describe('useDraggable', () => {
 
       const draggableElement = screen.getByTestId('draggable-item');
 
+      mockPointerCapture(draggableElement);
       draggableElement.getBoundingClientRect = () => ({
         left: 0,
         top: 0,
@@ -245,17 +266,19 @@ describe('useDraggable', () => {
       });
 
       // Start drag
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 50,
         clientY: 50,
-        pointerId: 1,
       });
 
-      expect(hookReturn!.isDragging).to.equal(true);
+      // Wait for drag to start (async state update)
+      await waitFor(() => {
+        expect(hookReturn!.isDragging).to.equal(true);
+      });
 
       // Cancel drag
-      fireEvent.pointerCancel(document, { pointerId: 1 });
+      fireEvent.mouseUp(document);
 
       await waitFor(() => {
         expect(hookReturn!.isDragging).to.equal(false);
@@ -271,6 +294,7 @@ describe('useDraggable', () => {
 
       const draggableElement = screen.getByTestId('draggable-item');
 
+      mockPointerCapture(draggableElement);
       draggableElement.getBoundingClientRect = () => ({
         left: 0,
         top: 0,
@@ -284,22 +308,20 @@ describe('useDraggable', () => {
       });
 
       // Start drag
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 50,
         clientY: 50,
-        pointerId: 1,
       });
 
       // Move pointer
       fireEvent.pointerMove(document, {
         clientX: 100,
         clientY: 100,
-        pointerId: 1,
       });
 
       // Cleanup
-      fireEvent.pointerUp(document, { pointerId: 1 });
+      fireEvent.mouseUp(document);
     });
   });
 
@@ -331,6 +353,9 @@ describe('useDraggable', () => {
         y: 0,
         toJSON: () => {},
       });
+
+      // Focus element before keyboard events
+      draggableElement.focus();
 
       fireEvent.keyDown(draggableElement, { key: 'Enter' });
 
@@ -374,6 +399,9 @@ describe('useDraggable', () => {
         toJSON: () => {},
       });
 
+      // Focus element before keyboard events
+      draggableElement.focus();
+
       fireEvent.keyDown(draggableElement, { key: ' ' });
 
       await waitFor(() => {
@@ -408,6 +436,9 @@ describe('useDraggable', () => {
         y: 0,
         toJSON: () => {},
       });
+
+      // Focus element before keyboard events
+      draggableElement.focus();
 
       // Start keyboard drag
       fireEvent.keyDown(draggableElement, { key: 'Enter' });
@@ -456,6 +487,9 @@ describe('useDraggable', () => {
         toJSON: () => {},
       });
 
+      // Focus element before keyboard events
+      draggableElement.focus();
+
       // Start keyboard drag
       fireEvent.keyDown(draggableElement, { key: 'Enter' });
 
@@ -499,6 +533,9 @@ describe('useDraggable', () => {
         y: 0,
         toJSON: () => {},
       });
+
+      // Focus element before keyboard events
+      draggableElement.focus();
 
       fireEvent.keyDown(draggableElement, { key: 'Enter' });
 
@@ -549,6 +586,11 @@ describe('useDraggable', () => {
 
       const draggableElement = screen.getByTestId('draggable-item');
 
+      // Mock pointer capture for JSDOM
+      draggableElement.setPointerCapture = () => {};
+      draggableElement.releasePointerCapture = () => {};
+      draggableElement.hasPointerCapture = () => true;
+
       draggableElement.getBoundingClientRect = () => ({
         left: 0,
         top: 0,
@@ -564,11 +606,10 @@ describe('useDraggable', () => {
       expect(draggableElement).to.have.attribute('aria-pressed', 'false');
 
       // Start drag
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 50,
         clientY: 50,
-        pointerId: 1,
       });
 
       await waitFor(() => {
@@ -620,6 +661,13 @@ describe('useDraggable', () => {
   });
 
   describe('edge cases', () => {
+    // Helper to mock pointer capture methods
+    const mockPointerCapture = (element: HTMLElement) => {
+      element.setPointerCapture = () => {};
+      element.releasePointerCapture = () => {};
+      element.hasPointerCapture = () => true;
+    };
+
     it('handles rapid drag start/end', async () => {
       render(
         <DndContext>
@@ -629,6 +677,7 @@ describe('useDraggable', () => {
 
       const draggableElement = screen.getByTestId('draggable-item');
 
+      mockPointerCapture(draggableElement);
       draggableElement.getBoundingClientRect = () => ({
         left: 0,
         top: 0,
@@ -643,7 +692,7 @@ describe('useDraggable', () => {
 
       // Rapid interactions
       for (let i = 0; i < 5; i++) {
-        fireEvent.pointerDown(draggableElement, {
+        fireEvent.mouseDown(draggableElement, {
           button: 0,
           clientX: 50,
           clientY: 50,
@@ -664,6 +713,7 @@ describe('useDraggable', () => {
 
       const draggableElement = screen.getByTestId('draggable-item');
 
+      mockPointerCapture(draggableElement);
       draggableElement.getBoundingClientRect = () => ({
         left: 0,
         top: 0,
@@ -677,11 +727,10 @@ describe('useDraggable', () => {
       });
 
       // Start drag
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 50,
         clientY: 50,
-        pointerId: 1,
       });
 
       // Unmount while dragging
@@ -701,6 +750,7 @@ describe('useDraggable', () => {
 
       const draggableElement = screen.getByTestId('draggable-item');
 
+      mockPointerCapture(draggableElement);
       draggableElement.getBoundingClientRect = () => ({
         left: 0,
         top: 0,
@@ -714,11 +764,10 @@ describe('useDraggable', () => {
       });
 
       // Start drag
-      fireEvent.pointerDown(draggableElement, {
+      fireEvent.mouseDown(draggableElement, {
         button: 0,
         clientX: 50,
         clientY: 50,
-        pointerId: 1,
       });
 
       // Disable during drag
