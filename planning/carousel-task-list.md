@@ -616,7 +616,8 @@ planning_notes: |
   10. Test with `pnpm dev`
 
   ### Deployment Preparation
-  - Include vercel.json or netlify.toml in PR-015A (not this PR)
+  - **Use Vercel** for deployment (already have paid account)
+  - Include vercel.json in PR-015A (not this PR)
   - For now, focus on local development workflow
   - Ensure build output works (`pnpm build && pnpm preview`)
 
@@ -624,6 +625,7 @@ planning_notes: |
   - Q: Vite or CRA? A: Vite for speed and modern tooling
   - Q: Workspace link or alias? A: Vite alias for simplicity
   - Q: How to navigate without PR-004 buttons? A: External buttons using useCarouselContext
+  - Q: Which hosting service? A: **Vercel** (paid account available)
 ---
 
 **Description:**
@@ -787,10 +789,16 @@ planning_notes: |
   - Class files for each component
   - Index files for each component directory
 
+  ### Icons Dependency
+  **@mui/icons-material is a peer dependency** - this package is meant to be merged
+  into @mui/material, so icons-material will always be available. No need to bundle
+  fallback SVG icons.
+
   ### Questions Resolved
   - Q: Separate components or inline? A: Separate for modularity
   - Q: Where do styled components go? A: In the component file, not separate styles/
   - Q: Make indicators clickable? A: Yes, for direct navigation
+  - Q: Bundle icons or peer dependency? A: **Peer dependency** (@mui/icons-material)
 ---
 
 **Description:**
@@ -827,16 +835,18 @@ estimated_files:
   - path: packages/mui-carousel/src/hooks/useSwipe.ts
     action: create
     description: |
-      Main swipe gesture hook combining touch tracking and gesture detection:
+      Main swipe/drag gesture hook using Pointer Events for unified touch + mouse:
       - Parameters: { onSwipeLeft, onSwipeRight, disabled, threshold, velocityThreshold }
-      - Returns: { handlers: { onTouchStart, onTouchMove, onTouchEnd }, swiping, swipeDistance }
-      - Touch tracking state: startX, startY, startTime, currentX, currentY
+      - Returns: { handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel }, swiping, swipeDistance }
+      - Pointer tracking state: startX, startY, startTime, currentX, currentY, pointerId
+      - Uses setPointerCapture for reliable drag tracking across element boundaries
       - Calculates swipe distance and velocity
       - Determines direction (left/right) based on deltaX
       - Calls onSwipeLeft/onSwipeRight when threshold exceeded
       - Implements velocity-based fling (fast swipe triggers even if short distance)
       - Returns swiping boolean for visual feedback
       - Returns swipeDistance for drag preview (PR-006 can use for animation)
+      - Works with both touch and mouse input
   - path: packages/mui-carousel/src/utils/gestureHelpers.ts
     action: create
     description: |
@@ -857,12 +867,13 @@ estimated_files:
   - path: packages/mui-carousel/src/Carousel/Carousel.tsx
     action: modify
     description: |
-      Integrate swipe handling:
+      Integrate swipe/drag handling:
       - Use useSwipe hook with goToNext/goToPrevious callbacks
-      - Attach touch handlers to CarouselSlides container
-      - Pass disableGestures prop to control swipe
-      - Update ownerState.dragging for styling during swipe
-      - Add touch-action: pan-y CSS to prevent browser gestures
+      - Attach pointer handlers to CarouselSlides container
+      - Pass disableGestures prop to control swipe/drag
+      - Update ownerState.dragging for styling during swipe/drag
+      - Add touch-action: pan-y CSS to prevent browser gestures on touch
+      - Add cursor: grab / grabbing CSS for mouse drag affordance
       - Handle defaultMuiPrevented pattern for event interception
   - path: packages/mui-carousel/src/hooks/index.ts
     action: modify
@@ -892,11 +903,13 @@ planning_notes: |
   - All touch logic encapsulated
   - Matches MUI's pattern of hooks returning handlers object
 
-  **Pointer Events vs Touch Events:**
-  Use Touch Events for this implementation:
-  - Better compatibility with older mobile browsers
-  - Touch events are more appropriate for swipe gestures
-  - Pointer events can be added later for unified mouse drag support
+  **Pointer Events for Unified Input:**
+  Use **Pointer Events** for unified touch + mouse handling:
+  - Single event model for both touch and mouse drag
+  - `pointerdown`, `pointermove`, `pointerup`, `pointercancel`
+  - Use `setPointerCapture` for reliable drag tracking
+  - Falls back gracefully on older browsers
+  - Matches MUI Slider's approach for drag interactions
 
   **Velocity Calculation:**
   ```typescript
@@ -942,26 +955,30 @@ planning_notes: |
 
   ### Questions Resolved
   - Q: Separate useTouch hook? A: No, combine into useSwipe
-  - Q: Touch or Pointer events? A: Touch events for mobile focus
+  - Q: Touch or Pointer events? A: **Pointer Events** for unified touch + mouse
+  - Q: Include mouse drag in v1? A: **Yes** - pointer events handle both
   - Q: How to handle nested scrollables? A: Direction detection + CSS touch-action
 ---
 
 **Description:**
-Implement native touch event handling for swipe gestures following Material UI's patterns. Include velocity-based recognition, thresholds, and conflict resolution with nested scrollable content.
+Implement Pointer Events handling for swipe/drag gestures following Material UI's patterns. Include velocity-based recognition, thresholds, and conflict resolution with nested scrollable content. Supports both touch and mouse input.
 
 **Acceptance Criteria:**
-- [ ] Swipe left/right navigates slides
+- [ ] Swipe left/right navigates slides (touch)
+- [ ] Mouse drag left/right navigates slides (mouse)
 - [ ] Velocity-based fling detection works
 - [ ] Threshold prevents accidental navigation
 - [ ] Works on all touch devices
+- [ ] Works with mouse on desktop
 - [ ] Handles multi-touch correctly (ignores)
 - [ ] Conflicts with nested scrollables resolved via direction detection
 - [ ] Uses MUI's defaultMuiPrevented pattern
-- [ ] dragging state updated during swipe for styling
+- [ ] dragging state updated during swipe/drag for styling
 - [ ] touch-action CSS applied for browser hint
+- [ ] cursor: grab/grabbing for mouse affordance
 
 **Notes:**
-Follow patterns from SwipeableDrawer and Slider components. No external gesture libraries - use native touch events only. Single useSwipe hook instead of separate useTouch.
+Follow patterns from SwipeableDrawer and Slider components. No external gesture libraries - use native Pointer Events for unified touch + mouse handling. Single useSwipe hook instead of separate useTouch.
 
 ## Block 2: Animation & Polish (Depends on Block 1)
 
@@ -1134,6 +1151,7 @@ planning_notes: |
   - Q: Separate CarouselSlide component? A: No, slide works with container transform
   - Q: RTG for both transitions? A: Only for fade; slide uses CSS on container
   - Q: How to handle swipe during transition? A: Disable transition CSS during drag
+  - Q: True crossfade or simple switch? A: **True crossfade** - both slides visible during transition
 ---
 
 **Description:**
