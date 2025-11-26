@@ -120,6 +120,9 @@ export function useCarousel(parameters: UseCarouselParameters): UseCarouselRetur
   // Dragging state (for swipe/drag gestures)
   const [dragging, setDragging] = React.useState(false);
 
+  // Track previous activeIndex to detect external changes
+  const prevActiveIndexRef = React.useRef<number>(activeIndex);
+
   // Calculate navigation boundaries
   const maxIndex = Math.max(0, slideCount - (slidesPerView ?? DEFAULT_SLIDES_PER_VIEW));
   const canGoPrevious = enableLoop || activeIndex > 0;
@@ -199,6 +202,19 @@ export function useCarousel(parameters: UseCarouselParameters): UseCarouselRetur
       pauseAutoPlay();
     }
   }, [activeIndex, maxIndex, enableLoop, isAutoPlaying, pauseAutoPlay]);
+
+  // Update direction when activeIndex changes externally (controlled mode)
+  React.useEffect(() => {
+    const prevIndex = prevActiveIndexRef.current;
+    if (activeIndex !== prevIndex) {
+      if (activeIndex > prevIndex) {
+        setDirection('forward');
+      } else if (activeIndex < prevIndex) {
+        setDirection('backward');
+      }
+      prevActiveIndexRef.current = activeIndex;
+    }
+  }, [activeIndex]);
 
   // Compose owner state for styled components
   const ownerState: CarouselOwnerState = {
