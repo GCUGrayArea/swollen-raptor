@@ -2815,7 +2815,7 @@ Each demo will include accessibility guidance in comments:
 ---
 pr_id: PR-016
 title: Video Demo Playground
-cold_state: planned
+cold_state: skipped
 priority: medium
 complexity:
   score: 3
@@ -2841,6 +2841,9 @@ Create a temporary consolidated playground page for recording the demo video. Sh
 
 **Notes:**
 This is for the assignment video only. Remove before upstream PR.
+
+**SKIPPED - Rationale:**
+The existing demo pages created in PR-015 (DraggableList.tsx, DraggableTable.tsx, DraggableGrid.tsx, DraggableChips.tsx) are sufficient for demonstrating the feature via the MUI docs site. The DnD system is intentionally simple with minimal configuration options, so a separate playground adds no value beyond what's already available. A video demo can simply navigate the existing docs pages.
 
 **Planning Notes (PR-016):**
 
@@ -3092,6 +3095,9 @@ estimated_files:
   - path: docs/data/material/components/drag-and-drop/drag-and-drop.md
     action: create
     description: Main DnD documentation page
+  - path: docs/data/material/pages.ts
+    action: modify
+    description: Add navigation entries for drag-and-drop component page and migration guide
 ---
 
 **Description:**
@@ -3248,16 +3254,21 @@ Each with:
 ### Performance Optimization
 ```
 
-**Additional File Considerations:**
-The estimated_files may need updates. MUI docs typically require:
-1. The main markdown file
-2. Demo component files (already created in PR-015)
-3. Possibly sidebar navigation updates (usually in a separate config file)
+**Navigation Config (docs/data/material/pages.ts):**
+Add entries to the pages.ts navigation config:
 
-Check if `docs/pages/material/components/drag-and-drop.js` or similar routing file is needed.
+1. **Component page** - Add to an appropriate component group (e.g., under "utils" or create new "interactions" subheader):
+```typescript
+{ pathname: '/material-ui/react-drag-and-drop', title: 'Drag and Drop', newFeature: true },
+```
+
+2. **Migration guide** - Add to the guides section:
+```typescript
+{ pathname: '/material-ui/guides/drag-and-drop-migration', title: 'Migrating from react-beautiful-dnd' },
+```
 
 **Parallel Execution:**
-- Can run in parallel with PR-016 and PR-018
+- Can run in parallel with PR-018
 - No file conflicts expected
 
 ---
