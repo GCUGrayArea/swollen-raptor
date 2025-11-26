@@ -17,21 +17,27 @@ import { clampIndex, wrapIndex, getValidChildren } from '../utils/carouselHelper
 import { useAutoPlay } from './useAutoPlay';
 
 export interface UseCarouselParameters
-  extends Pick<
-    CarouselOwnProps,
-    | 'activeIndex'
-    | 'defaultActiveIndex'
-    | 'autoPlay'
-    | 'autoPlayInterval'
-    | 'children'
-    | 'disableGestures'
-    | 'enableLoop'
-    | 'onChange'
-    | 'slidesPerView'
-    | 'spacing'
-    | 'transition'
-    | 'transitionDuration'
-  > {}
+  extends Omit<
+    Pick<
+      CarouselOwnProps,
+      | 'activeIndex'
+      | 'defaultActiveIndex'
+      | 'autoPlay'
+      | 'autoPlayInterval'
+      | 'children'
+      | 'disableGestures'
+      | 'enableLoop'
+      | 'onChange'
+      | 'slidesPerView'
+      | 'spacing'
+      | 'transition'
+      | 'transitionDuration'
+    >,
+    'slidesPerView'
+  > {
+  /** Number of slides visible at once (resolved from responsive value) */
+  slidesPerView?: number;
+}
 
 export interface UseCarouselReturnValue {
   /** Current active slide index */
@@ -115,7 +121,7 @@ export function useCarousel(parameters: UseCarouselParameters): UseCarouselRetur
   const [dragging, setDragging] = React.useState(false);
 
   // Calculate navigation boundaries
-  const maxIndex = Math.max(0, slideCount - slidesPerView);
+  const maxIndex = Math.max(0, slideCount - (slidesPerView ?? DEFAULT_SLIDES_PER_VIEW));
   const canGoPrevious = enableLoop || activeIndex > 0;
   const canGoNext = enableLoop || activeIndex < maxIndex;
 

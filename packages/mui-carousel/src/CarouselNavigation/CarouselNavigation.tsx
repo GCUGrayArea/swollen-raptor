@@ -124,10 +124,14 @@ const CarouselNavigation = React.forwardRef<HTMLDivElement, CarouselNavigationPr
       nextButtonProps?.onClick?.(event);
     };
 
+    // Omit 'color' prop as it conflicts with IconButton's color type
+    const { color: _prevColor, ...prevButtonPropsWithoutColor } = prevButtonProps || {};
+    const { color: _nextColor, ...nextButtonPropsWithoutColor } = nextButtonProps || {};
+
     return (
       <NavigationRoot ref={ref} className={clsx(classes.root, className)} ownerState={ownerState} {...other}>
         <NavigationButton
-          {...prevButtonProps}
+          {...prevButtonPropsWithoutColor}
           onClick={handlePrevClick}
           disabled={prevDisabled}
           aria-label="Go to previous slide"
@@ -138,7 +142,7 @@ const CarouselNavigation = React.forwardRef<HTMLDivElement, CarouselNavigationPr
           {prevIcon ?? <PrevIcon />}
         </NavigationButton>
         <NavigationButton
-          {...nextButtonProps}
+          {...nextButtonPropsWithoutColor}
           onClick={handleNextClick}
           disabled={nextDisabled}
           aria-label="Go to next slide"
