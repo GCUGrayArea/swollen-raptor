@@ -5,9 +5,22 @@ import clsx from 'clsx';
 import composeClasses from '@mui/utils/composeClasses';
 import { styled, useTheme, useThemeProps } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
-import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import SvgIcon from '@mui/material/SvgIcon';
 import { useCarouselContext } from '../CarouselContext';
+
+// Inline SVG icons to avoid @mui/icons-material dependency
+const KeyboardArrowLeft = (props: React.ComponentProps<typeof SvgIcon>) => (
+  <SvgIcon {...props}>
+    <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z" />
+  </SvgIcon>
+);
+
+const KeyboardArrowRight = (props: React.ComponentProps<typeof SvgIcon>) => (
+  <SvgIcon {...props}>
+    <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" />
+  </SvgIcon>
+);
+
 import {
   CarouselNavigationProps,
   CarouselNavigationOwnerState,
