@@ -222,6 +222,7 @@ export function SortableContext(props: SortableContextProps): React.JSX.Element 
    * Register an item's DOM rect.
    */
   const registerItemRect = React.useCallback((id: UniqueIdentifier, rect: DOMRect) => {
+    console.log('[SortableContext] registerItemRect:', id, 'width:', rect.width, 'height:', rect.height);
     itemRectsRef.current.set(id, rect);
   }, []);
 
@@ -250,7 +251,7 @@ export function SortableContext(props: SortableContextProps): React.JSX.Element 
       // Get the sorting strategy function
       const strategyFn = getSortingStrategy(strategy);
 
-      return strategyFn({
+      const result = strategyFn({
         id,
         activeId,
         overId,
@@ -258,6 +259,10 @@ export function SortableContext(props: SortableContextProps): React.JSX.Element 
         itemRects: itemRectsRef.current,
         columns,
       });
+
+      console.log('[SortableContext] getItemTransform:', id, 'activeId:', activeId, 'overId:', overId, 'result:', result, 'itemRects:', itemRectsRef.current.size);
+
+      return result;
     },
     [isSorting, activeId, overId, items, strategy, columns],
   );

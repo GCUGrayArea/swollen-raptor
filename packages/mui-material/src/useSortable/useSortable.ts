@@ -177,6 +177,10 @@ export function useSortable(options: UseSortableOptions): UseSortableReturn {
   // Merge refs - call both setNodeRef functions when the ref changes
   // Also register rect with SortableContext if available
   const setNodeRef = useEventCallback((node: HTMLElement | null) => {
+    // Only log when node actually changes
+    if (nodeRef.current !== node) {
+      console.log('[useSortable] setNodeRef:', id, 'node:', !!node, 'hasSortableContext:', !!sortableContext);
+    }
     nodeRef.current = node;
     draggable.setNodeRef(node);
     droppable.setNodeRef(node);
@@ -184,28 +188,39 @@ export function useSortable(options: UseSortableOptions): UseSortableReturn {
     // Register/update rect with SortableContext
     if (sortableContext && node) {
       const rect = node.getBoundingClientRect();
+      console.log('[useSortable] registering rect for:', id, 'rect:', rect.width, 'x', rect.height);
       sortableContext.registerItemRect(id, rect);
+    } else if (node) {
+      console.log('[useSortable] NOT registering rect for:', id, 'sortableContext is:', sortableContext);
     }
   });
 
-  // Unregister from SortableContext on unmount
+  // Store sortableContext in a ref so cleanup doesn't depend on it changing
+  // This prevents the cleanup from running when contextValue changes (which happens on drag start)
+  const sortableContextRef = React.useRef(sortableContext);
+  sortableContextRef.current = sortableContext;
+
+  // Unregister from SortableContext on unmount only
   useEnhancedEffect(() => {
     return () => {
-      if (sortableContext) {
-        sortableContext.unregisterItemRect(id);
+      if (sortableContextRef.current) {
+        sortableContextRef.current.unregisterItemRect(id);
       }
     };
-  }, [sortableContext, id]);
+  }, [id]); // Only depend on id, not sortableContext
 
   // Calculate transform - use SortableContext for non-dragged items when available
   const transform = React.useMemo((): Coordinates | null => {
     if (draggable.isDragging) {
       // Dragged item uses useDraggable's transform (follows pointer)
+      console.log('[useSortable] transform for dragging item:', id, draggable.transform);
       return draggable.transform;
     }
     if (sortableContext) {
       // Non-dragged items get transform from SortableContext (shift to make room)
-      return sortableContext.getItemTransform(id);
+      const result = sortableContext.getItemTransform(id);
+      console.log('[useSortable] transform for non-dragging item:', id, 'result:', result);
+      return result;
     }
     // No SortableContext - no transform for non-dragged items
     return null;
