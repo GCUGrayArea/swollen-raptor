@@ -82,6 +82,9 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
   const [active, setActive] = React.useState<Active | null>(null);
   const [over, setOver] = React.useState<Over | null>(null);
 
+  // Ref to track active state synchronously (React state updates are async)
+  const activeRef = React.useRef<Active | null>(null);
+
   // Track previous over state to detect changes
   const previousOverRef = React.useRef<Over | null>(null);
 
@@ -145,7 +148,6 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
    */
   const registerDraggable = React.useCallback(
     (id: UniqueIdentifier, node: HTMLElement, data: Record<string, unknown> = {}) => {
-      console.log('[DnD] registerDraggable:', id, 'total:', draggablesRef.current.size + 1);
       draggablesRef.current.set(id, { id, node, data });
     },
     [],
@@ -163,7 +165,6 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
    */
   const registerDroppable = React.useCallback(
     (id: UniqueIdentifier, node: HTMLElement, data: Record<string, unknown> = {}) => {
-      console.log('[DnD] registerDroppable:', id, 'total:', droppablesRef.current.size + 1);
       droppablesRef.current.set(id, { id, node, data });
     },
     [],
@@ -181,7 +182,6 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
    */
   const dragStart = React.useCallback(
     (id: UniqueIdentifier) => {
-      console.log('[DnD] dragStart:', id, 'draggables:', draggablesRef.current.size, 'droppables:', droppablesRef.current.size);
       const draggable = draggablesRef.current.get(id);
       if (!draggable) {
         if (process.env.NODE_ENV !== 'production') {
@@ -206,6 +206,8 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
       // Store initial rect for virtual rect calculation during drag
       initialRectRef.current = rect;
 
+      // Set ref synchronously for immediate access in dragMove
+      activeRef.current = newActive;
       setActive(newActive);
       setOver(null);
       previousOverRef.current = null;
@@ -229,7 +231,9 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
       // Store coordinates for synchronous access in dragEnd
       lastPointerCoordinatesRef.current = coordinates;
 
-      if (!active || !initialRectRef.current || !startCoordinatesRef.current) {
+      // Use ref for synchronous access (state might not be updated yet)
+      const currentActive = activeRef.current;
+      if (!currentActive || !initialRectRef.current || !startCoordinatesRef.current) {
         return;
       }
 
@@ -255,9 +259,12 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
       } as DOMRect;
 
       const updatedActive: Active = {
-        ...active,
+        ...currentActive,
         rect: virtualRect,
       };
+
+      // Also update the ref with the latest active state
+      activeRef.current = updatedActive;
 
       // Run collision detection synchronously for immediate visual feedback
       const collidingId = collisionDetection({
@@ -265,7 +272,6 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
         droppables: droppablesRef.current,
         pointerCoordinates: coordinates,
       });
-      console.log('[DnD] collision:', collidingId, 'droppables:', droppablesRef.current.size);
 
       let newOver: Over | null = null;
       if (collidingId !== null) {
@@ -319,7 +325,7 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
         previousOverRef.current = newOver;
       });
     },
-    [active, collisionDetection, dispatchMonitorEvent, announce, onDragMoveProp, onDragOverProp],
+    [collisionDetection, dispatchMonitorEvent, announce, onDragMoveProp, onDragOverProp],
   );
 
   /**
@@ -332,7 +338,9 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
       rafRef.current = null;
     }
 
-    if (!active) {
+    // Use ref for synchronous access (state might not be updated yet)
+    const currentActive = activeRef.current;
+    if (!currentActive) {
       return;
     }
 
@@ -364,7 +372,7 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
       } as DOMRect;
 
       const updatedActive: Active = {
-        ...active,
+        ...currentActive,
         rect: virtualRect,
       };
 
@@ -388,14 +396,16 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
     }
 
     const event: DragEndEvent = {
-      active,
+      active: currentActive,
       over: finalOver,
     };
 
     dispatchMonitorEvent('onDragEnd', event);
     onDragEndProp?.(event);
-    announce('onDragEnd', active, finalOver);
+    announce('onDragEnd', currentActive, finalOver);
 
+    // Clear both ref and state
+    activeRef.current = null;
     setActive(null);
     setOver(null);
     previousOverRef.current = null;
@@ -403,7 +413,7 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
     startCoordinatesRef.current = null;
     initialRectRef.current = null;
     lastPointerCoordinatesRef.current = null;
-  }, [active, collisionDetection, dispatchMonitorEvent, announce, onDragEndProp]);
+  }, [collisionDetection, dispatchMonitorEvent, announce, onDragEndProp]);
 
   /**
    * Cancel a drag operation.
@@ -415,16 +425,20 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
       rafRef.current = null;
     }
 
-    if (!active) {
+    // Use ref for synchronous access (state might not be updated yet)
+    const currentActive = activeRef.current;
+    if (!currentActive) {
       return;
     }
 
-    const event: DragCancelEvent = { active };
+    const event: DragCancelEvent = { active: currentActive };
 
     dispatchMonitorEvent('onDragCancel', event);
     onDragCancelProp?.(event);
-    announce('onDragCancel', active, null);
+    announce('onDragCancel', currentActive, null);
 
+    // Clear both ref and state
+    activeRef.current = null;
     setActive(null);
     setOver(null);
     previousOverRef.current = null;
@@ -432,7 +446,7 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
     startCoordinatesRef.current = null;
     initialRectRef.current = null;
     lastPointerCoordinatesRef.current = null;
-  }, [active, dispatchMonitorEvent, announce, onDragCancelProp]);
+  }, [dispatchMonitorEvent, announce, onDragCancelProp]);
 
   /**
    * Register a monitor to receive drag events.

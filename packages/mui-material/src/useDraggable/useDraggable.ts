@@ -352,11 +352,6 @@ export function useDraggable(options: UseDraggableOptions): UseDraggableReturn {
    * Ref callback to track the DOM node and register immediately
    */
   const setNodeRef = useEventCallback((node: HTMLElement | null) => {
-    // Only log when node actually changes
-    if (nodeRef.current !== node) {
-      console.log('[useDraggable] setNodeRef:', id, 'node:', !!node, 'disabled:', disabled);
-    }
-
     nodeRef.current = node;
 
     // Register new node immediately (re-registration is idempotent via Map.set)
