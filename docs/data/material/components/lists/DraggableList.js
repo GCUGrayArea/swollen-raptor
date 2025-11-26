@@ -6,7 +6,7 @@
  * ## Comparison with react-beautiful-dnd
  *
  * ### Before (react-beautiful-dnd):
- * ```tsx
+ * ```jsx
  * import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
  *
  * <DragDropContext onDragEnd={handleDragEnd}>
@@ -34,7 +34,7 @@
  * ```
  *
  * ### After (MUI Native):
- * ```tsx
+ * ```jsx
  * import { DndContext } from '@mui/material/DndContext';
  * import { SortableContext } from '@mui/material/SortableContext';
  * import { DraggableListItem } from '@mui/material/ListItem';
@@ -70,17 +70,10 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { DndContext } from '@mui/material/DndContext';
-import type { DragEndEvent } from '@mui/material/DndContext';
 import { SortableContext } from '@mui/material/SortableContext';
 import { DraggableListItem } from '@mui/material/ListItem';
 
-interface Task {
-  id: string;
-  title: string;
-  completed: boolean;
-}
-
-const initialTasks: Task[] = [
+const initialTasks = [
   { id: '1', title: 'Review pull request', completed: false },
   { id: '2', title: 'Update documentation', completed: true },
   { id: '3', title: 'Fix navigation bug', completed: false },
@@ -88,9 +81,9 @@ const initialTasks: Task[] = [
 ];
 
 export default function DraggableList() {
-  const [tasks, setTasks] = React.useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = React.useState(initialTasks);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = (event) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
       setTasks((prev) => {

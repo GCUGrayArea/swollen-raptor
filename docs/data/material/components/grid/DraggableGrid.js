@@ -6,7 +6,7 @@
  * ## Comparison with react-beautiful-dnd
  *
  * ### Before (react-beautiful-dnd):
- * ```tsx
+ * ```jsx
  * import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
  *
  * <DragDropContext onDragEnd={handleDragEnd}>
@@ -35,7 +35,7 @@
  * ```
  *
  * ### After (MUI Native):
- * ```tsx
+ * ```jsx
  * import { DndContext } from '@mui/material/DndContext';
  * import { SortableContext } from '@mui/material/SortableContext';
  * import { DraggableGridItem } from '@mui/material/Grid';
@@ -73,18 +73,10 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import { DndContext } from '@mui/material/DndContext';
-import type { DragEndEvent } from '@mui/material/DndContext';
 import { SortableContext } from '@mui/material/SortableContext';
 import { DraggableGridItem } from '@mui/material/Grid';
 
-interface DashboardCard {
-  id: string;
-  title: string;
-  value: string;
-  color: string;
-}
-
-const initialCards: DashboardCard[] = [
+const initialCards = [
   { id: '1', title: 'Revenue', value: '$12,345', color: '#e3f2fd' },
   { id: '2', title: 'Users', value: '1,234', color: '#f3e5f5' },
   { id: '3', title: 'Orders', value: '567', color: '#e8f5e9' },
@@ -94,9 +86,9 @@ const initialCards: DashboardCard[] = [
 ];
 
 export default function DraggableGrid() {
-  const [cards, setCards] = React.useState<DashboardCard[]>(initialCards);
+  const [cards, setCards] = React.useState(initialCards);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = (event) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
       setCards((prev) => {

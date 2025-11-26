@@ -6,7 +6,7 @@
  * ## Comparison with react-beautiful-dnd
  *
  * ### Before (react-beautiful-dnd):
- * ```tsx
+ * ```jsx
  * import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
  *
  * <DragDropContext onDragEnd={handleDragEnd}>
@@ -41,7 +41,7 @@
  * ```
  *
  * ### After (MUI Native):
- * ```tsx
+ * ```jsx
  * import { DndContext } from '@mui/material/DndContext';
  * import { SortableContext } from '@mui/material/SortableContext';
  * import { DraggableTableRow } from '@mui/material/TableRow';
@@ -87,18 +87,10 @@ import TableHead from '@mui/material/TableHead';
 import Paper from '@mui/material/Paper';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { DndContext } from '@mui/material/DndContext';
-import type { DragEndEvent } from '@mui/material/DndContext';
 import { SortableContext } from '@mui/material/SortableContext';
 import { DraggableTableRow } from '@mui/material/TableRow';
 
-interface Person {
-  id: string;
-  name: string;
-  role: string;
-  status: string;
-}
-
-const initialRows: Person[] = [
+const initialRows = [
   { id: '1', name: 'Alice Johnson', role: 'Engineer', status: 'Active' },
   { id: '2', name: 'Bob Smith', role: 'Designer', status: 'Active' },
   { id: '3', name: 'Carol Williams', role: 'Manager', status: 'Away' },
@@ -107,9 +99,9 @@ const initialRows: Person[] = [
 ];
 
 export default function DraggableTable() {
-  const [rows, setRows] = React.useState<Person[]>(initialRows);
+  const [rows, setRows] = React.useState(initialRows);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = (event) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
       setRows((prev) => {

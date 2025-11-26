@@ -44,8 +44,15 @@ const liveRegionStyles: React.CSSProperties = {
  * @example
  * ```tsx
  * function App() {
+ *   const handleDragEnd = (event: DragEndEvent) => {
+ *     const { active, over } = event;
+ *     if (over && active.id !== over.id) {
+ *       // Reorder items
+ *     }
+ *   };
+ *
  *   return (
- *     <DndContext>
+ *     <DndContext onDragEnd={handleDragEnd}>
  *       <MyDraggableList />
  *     </DndContext>
  *   );
@@ -53,7 +60,16 @@ const liveRegionStyles: React.CSSProperties = {
  * ```
  */
 export function DndContext(props: DndContextProps): React.JSX.Element {
-  const { children, collisionDetection = rectIntersection, accessibility } = props;
+  const {
+    children,
+    collisionDetection = rectIntersection,
+    accessibility,
+    onDragStart: onDragStartProp,
+    onDragMove: onDragMoveProp,
+    onDragOver: onDragOverProp,
+    onDragEnd: onDragEndProp,
+    onDragCancel: onDragCancelProp,
+  } = props;
 
   // Registries for draggables and droppables
   const draggablesRef = React.useRef<Map<UniqueIdentifier, DraggableEntry>>(new Map());
@@ -180,9 +196,10 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
 
       const event: DragStartEvent = { active: newActive };
       dispatchMonitorEvent('onDragStart', event);
+      onDragStartProp?.(event);
       announce('onDragStart', newActive, null);
     },
-    [dispatchMonitorEvent, announce],
+    [dispatchMonitorEvent, announce, onDragStartProp],
   );
 
   /**
@@ -253,6 +270,7 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
           delta,
         };
         dispatchMonitorEvent('onDragMove', moveEvent);
+        onDragMoveProp?.(moveEvent);
 
         // Check if we entered a new droppable
         const previousOverId = previousOverRef.current?.id;
@@ -264,13 +282,14 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
             over: newOver,
           };
           dispatchMonitorEvent('onDragOver', overEvent);
+          onDragOverProp?.(overEvent);
           announce('onDragOver', updatedActive, newOver);
         }
 
         previousOverRef.current = newOver;
       });
     },
-    [active, collisionDetection, dispatchMonitorEvent, announce],
+    [active, collisionDetection, dispatchMonitorEvent, announce, onDragMoveProp, onDragOverProp],
   );
 
   /**
@@ -293,13 +312,14 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
     };
 
     dispatchMonitorEvent('onDragEnd', event);
+    onDragEndProp?.(event);
     announce('onDragEnd', active, over);
 
     setActive(null);
     setOver(null);
     previousOverRef.current = null;
     startCoordinatesRef.current = null;
-  }, [active, over, dispatchMonitorEvent, announce]);
+  }, [active, over, dispatchMonitorEvent, announce, onDragEndProp]);
 
   /**
    * Cancel a drag operation.
@@ -318,13 +338,14 @@ export function DndContext(props: DndContextProps): React.JSX.Element {
     const event: DragCancelEvent = { active };
 
     dispatchMonitorEvent('onDragCancel', event);
+    onDragCancelProp?.(event);
     announce('onDragCancel', active, null);
 
     setActive(null);
     setOver(null);
     previousOverRef.current = null;
     startCoordinatesRef.current = null;
-  }, [active, dispatchMonitorEvent, announce]);
+  }, [active, dispatchMonitorEvent, announce, onDragCancelProp]);
 
   /**
    * Register a monitor to receive drag events.

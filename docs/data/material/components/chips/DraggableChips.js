@@ -6,7 +6,7 @@
  * ## Comparison with react-beautiful-dnd
  *
  * ### Before (react-beautiful-dnd):
- * ```tsx
+ * ```jsx
  * import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
  *
  * <DragDropContext onDragEnd={handleDragEnd}>
@@ -38,7 +38,7 @@
  * ```
  *
  * ### After (MUI Native):
- * ```tsx
+ * ```jsx
  * import { DndContext } from '@mui/material/DndContext';
  * import { SortableContext } from '@mui/material/SortableContext';
  * import { DraggableChip } from '@mui/material/Chip';
@@ -78,19 +78,10 @@ import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { DndContext } from '@mui/material/DndContext';
-import type { DragEndEvent } from '@mui/material/DndContext';
 import { SortableContext } from '@mui/material/SortableContext';
 import { DraggableChip } from '@mui/material/Chip';
 
-type ChipColor = 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
-
-interface Tag {
-  id: string;
-  label: string;
-  color: ChipColor;
-}
-
-const initialTags: Tag[] = [
+const initialTags = [
   { id: '1', label: 'React', color: 'primary' },
   { id: '2', label: 'TypeScript', color: 'secondary' },
   { id: '3', label: 'Material UI', color: 'success' },
@@ -99,9 +90,9 @@ const initialTags: Tag[] = [
 ];
 
 export default function DraggableChips() {
-  const [tags, setTags] = React.useState<Tag[]>(initialTags);
+  const [tags, setTags] = React.useState(initialTags);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = (event) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
       setTags((prev) => {
@@ -115,7 +106,7 @@ export default function DraggableChips() {
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id) => {
     setTags((prev) => prev.filter((tag) => tag.id !== id));
   };
 
