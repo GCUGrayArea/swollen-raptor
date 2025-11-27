@@ -338,8 +338,9 @@ describe('Drag and Drop E2E', () => {
     });
 
     it('should allow delete during non-drag', async () => {
-      // Get initial chip count
-      const initialChips = page.locator('[data-testid^="chip-"]');
+      // Get initial chip count (match chip-1, chip-2, etc. but not chip-order)
+      const chipSelector = '[data-testid^="chip-"]:not([data-testid="chip-order"])';
+      const initialChips = page.locator(chipSelector);
       const initialCount = await initialChips.count();
       expect(initialCount).to.equal(5);
 
@@ -349,7 +350,7 @@ describe('Drag and Drop E2E', () => {
       await sleep(200);
 
       // Chip count should decrease by 1
-      const newCount = await initialChips.count();
+      const newCount = await page.locator(chipSelector).count();
       expect(newCount).to.equal(4);
     });
   });
